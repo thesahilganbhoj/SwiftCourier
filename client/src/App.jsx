@@ -10,6 +10,9 @@ import AdminDashboard from './pages/AdminDashboard'
 import UserDashboard from './pages/UserDashboard'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import StaffProfile from './pages/StaffProfile'
+import CustomerProfile from './pages/CustomerProfile'
+
 
 export const AuthContext = createContext()
 
@@ -31,6 +34,9 @@ function App() {
           <Route path='/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
           <Route path='/track-courier' element={<TrackCourier />} />
+          <Route path='/staff-profile' element={<StaffProfile />} />
+          <Route path='/customer-profile' element={<CustomerProfile />} />
+          <Route path='/' element={<Login />} />
         </Routes>
         
       </AuthContext.Provider>
