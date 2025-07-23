@@ -5,10 +5,19 @@ import { AuthContext } from '../App'
 function Navbar() {
     // get the logged in user info
     const { user, setUser } = useContext(AuthContext)
-
-
     // get the navigate function reference
     const navigate = useNavigate()
+
+    // Logout function
+    const handleLogout = () => {
+        // Clear user data
+        setUser(null)
+        // Clear any stored authentication data (if using localStorage/sessionStorage)
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+        // Redirect to login page
+        navigate('/login')
+    }
 
     return (
         <nav
@@ -18,60 +27,139 @@ function Navbar() {
             <div className='container-fluid'>
                 <Link
                     className='navbar-brand'
-                    to='/admin'
+                    to='/swiftcourier'
                 >
                     SwiftCourier
                 </Link>
-
+                <button
+                    className='navbar-toggler'
+                    type='button'
+                    data-bs-toggle='collapse'
+                    data-bs-target='#navbarNavDropdown'
+                    aria-controls='navbarNavDropdown'
+                    aria-expanded='false'
+                    aria-label='Toggle navigation'
+                >
+                    <span className='navbar-toggler-icon'></span>
+                </button>
                 <div
                     className='collapse navbar-collapse'
-                    id='navbarText'
+                    id='navbarNavDropdown'
                 >
                     <ul className='navbar-nav me-auto mb-2 mb-lg-0'>
-                        <li className='nav-item'>
-                            <Link
-                                className='nav-link'
-                                aria-current='page'
-                                to='/user'
+                        {/* Admin Dropdown */}
+                        <li className='nav-item dropdown'>
+                            <a
+                                className='nav-link dropdown-toggle'
+                                href='#'
+                                role='button'
+                                data-bs-toggle='dropdown'
+                                aria-expanded='false'
                             >
-                                Home
-                            </Link>
+                                Admin
+                            </a>
+                            <ul className='dropdown-menu'>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/dashboard'>
+                                        Dashboard
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/manage-staff'>
+                                        Manage Staff
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/add-staff'>
+                                        Add Staff
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/delete-staff'>
+                                        Delete Staff
+                                    </Link>
+                                </li>
+                                <li><hr className='dropdown-divider' /></li>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/manage-hub'>
+                                        Manage Hub
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/admin/order-history'>
+                                        Order History
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
 
-                        <li className='nav-item'>
-                            <Link
-                                className='nav-link'
-                                aria-current='page'
-                                to='/add-courier'
+                        {/* Staff Dropdown */}
+                        <li className='nav-item dropdown'>
+                            <a
+                                className='nav-link dropdown-toggle'
+                                href='#'
+                                role='button'
+                                data-bs-toggle='dropdown'
+                                aria-expanded='false'
                             >
-                                Add Courier
-                            </Link>
+                                Staff
+                            </a>
+                            <ul className='dropdown-menu'>
+                                <li>
+                                    <Link className='dropdown-item' to='/staff/add-staff'>
+                                        Add Staff
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/staff/profile'>
+                                        Staff Profile
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
 
-                        <li className='nav-item'>
-                            <Link
-                                className='nav-link'
-                                aria-current='page'
-                                to='/view-couriers'
+                        {/* Customer Dropdown */}
+                        <li className='nav-item dropdown'>
+                            <a
+                                className='nav-link dropdown-toggle'
+                                href='#'
+                                role='button'
+                                data-bs-toggle='dropdown'
+                                aria-expanded='false'
                             >
-                                View Couriers
-                            </Link>
+                                Customer
+                            </a>
+                            <ul className='dropdown-menu'>
+                                <li>
+                                    <Link className='dropdown-item' to='/customer/profile'>
+                                        Customer Profile
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/customer/order-details'>
+                                        Order Details
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/customer/track-order'>
+                                        Track Order
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/customer/feedback'>
+                                        Feedback
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
+                    </ul>
 
-                        <li className='nav-item'>
-                            <Link
-                                className='nav-link'
-                                aria-current='page'
-                                to='/track-courier'
-                            >
-                                Track Courier
-                            </Link>
-                        </li>
-                        
+                    {/* Logout Button */}
+                    <ul className='navbar-nav'>
                         <li className='nav-item'>
                             <button
-                                // onClick={onLogout}
-                                className='btn'
+                                onClick={handleLogout}
+                                className='btn btn-outline-light'
                             >
                                 Logout
                             </button>
