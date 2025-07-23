@@ -29,13 +29,13 @@ function App() {
         <Routes>
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path='/admin' element={<AdminDashboard />} />
+          <Route path='/admin/dashboard' element={<AdminDashboard />} />
           <Route path='/user' element={<UserDashboard />} />
           <Route path='/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
           <Route path='/track-courier' element={<TrackCourier />} />
-          <Route path='/staff-profile' element={<StaffProfile />} />
-          <Route path='/customer-profile' element={<CustomerProfile />} />
+          <Route path='/staff/profile' element={<StaffProfile />} />
+          <Route path='/customer/profile' element={<CustomerProfile />} />
           <Route path='/' element={<Login />} />
         </Routes>
         
