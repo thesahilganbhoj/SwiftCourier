@@ -40,6 +40,7 @@
 
 #pdf
 *.pdf
+*.pptx
 
 # Dependency directories
 node_modules/
