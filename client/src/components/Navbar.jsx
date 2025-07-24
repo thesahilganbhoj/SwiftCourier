@@ -146,6 +146,11 @@ function Navbar() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link className='dropdown-item' to='/customer/order-history'>
+                                        Order History
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link className='dropdown-item' to='/customer/feedback'>
                                         Feedback
                                     </Link>

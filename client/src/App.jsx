@@ -13,6 +13,7 @@ import Register from './pages/Register'
 import StaffProfile from './pages/StaffProfile'
 import CustomerProfile from './pages/CustomerProfile'
 import OrderDetails from './pages/OrderDetails'
+import OrderHistory from './pages/OrderHistory'
 
 
 export const AuthContext = createContext()
@@ -36,6 +37,7 @@ function App() {
           <Route path='/view-couriers' element={<ViewCouriers />} />
           <Route path='/customer/track-courier' element={<TrackCourier />} />
           <Route path='/customer/order-details' element={<OrderDetails />} />
+          <Route path='/customer/order-history' element={<OrderHistory />} />
           <Route path='/staff/profile' element={<StaffProfile />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
           <Route path='/' element={<Login />} />
