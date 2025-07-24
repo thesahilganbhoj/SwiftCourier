@@ -33,7 +33,7 @@ function App() {
           <Route path='/user' element={<UserDashboard />} />
           <Route path='/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
-          <Route path='/track-courier' element={<TrackCourier />} />
+          <Route path='/customer/track-courier' element={<TrackCourier />} />
           <Route path='/staff/profile' element={<StaffProfile />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
           <Route path='/' element={<Login />} />
