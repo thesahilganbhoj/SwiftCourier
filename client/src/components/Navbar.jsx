@@ -131,6 +131,11 @@ function Navbar() {
                             </a>
                             <ul className='dropdown-menu'>
                                 <li>
+                                    <Link className='dropdown-item' to='/customer/homepage'>
+                                        Home Page
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link className='dropdown-item' to='/customer/profile'>
                                         Customer Profile
                                     </Link>

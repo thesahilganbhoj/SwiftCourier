@@ -4,6 +4,7 @@ import {Route,Routes} from 'react-router-dom'
 
 
 import AddCourier from './pages/AddCourier'
+import HomePage from './pages/HomePage'
 import OrderHistoryAdmin from './pages/OrderHistoryAdmin'
 import ViewCouriers from './pages/ViewCouriers'
 import TrackCourier from './pages/TrackCourier'
@@ -39,6 +40,7 @@ function App() {
           <Route path='/user' element={<UserDashboard />} />
           <Route path='/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
+          <Route path='/customer/homepage' element={<HomePage />} />
           <Route path='/customer/track-courier' element={<TrackCourier />} />
           <Route path='/customer/order-details' element={<OrderDetails />} />
           <Route path='/customer/order-history' element={<OrderHistory />} />
