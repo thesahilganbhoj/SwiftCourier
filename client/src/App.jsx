@@ -4,6 +4,7 @@ import {Route,Routes} from 'react-router-dom'
 
 
 import AddCourier from './pages/AddCourier'
+import OrderHistoryAdmin from './pages/OrderHistoryAdmin'
 import ViewCouriers from './pages/ViewCouriers'
 import TrackCourier from './pages/TrackCourier'
 import AdminDashboard from './pages/AdminDashboard'
@@ -32,6 +33,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/admin/dashboard' element={<AdminDashboard />} />
+          <Route path='/admin/order-history' element={<OrderHistoryAdmin/>} />
           <Route path='/user' element={<UserDashboard />} />
           <Route path='/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
