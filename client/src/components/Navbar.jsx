@@ -27,7 +27,7 @@ function Navbar() {
             <div className='container-fluid'>
                 <Link
                     className='navbar-brand'
-                    to='/swiftcourier'
+                    to='/customer/homepage'
                 >
                     SwiftCourier
                 </Link>
