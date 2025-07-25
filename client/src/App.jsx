@@ -55,6 +55,7 @@ function App() {
               <Route path='/admin/delete-staff' element={<DeleteStaff />} />
                 <Route path='/customer/feedback' element={<FeedbackForm />} />
           <Route path='/' element={<Login />} />
+          <Route path='/' element={<HomePage />} />
         </Routes>
         
       </AuthContext.Provider>
