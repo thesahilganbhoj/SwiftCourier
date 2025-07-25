@@ -72,7 +72,7 @@ export default function OrderHistoryAdmin() {
           <div className="col-12">
             <div className="card shadow-sm">
               <div className="card-header bg-white">
-                <h4 className="mb-0">Pending Orders</h4>
+                <h4 className="mb-0">Order History</h4>
               </div>
               <div className="card-body p-0">
                 <div className="table-responsive">
