@@ -17,6 +17,10 @@ import CustomerProfile from './pages/CustomerProfile'
 import OrderDetails from './pages/OrderDetails'
 import OrderHistory from './pages/OrderHistory'
 import ManageHub from './pages/ManageHub'
+import StaffDetails from './pages/StaffDetails'
+import AddStaff from './pages/AddStaff'
+import DeleteStaff from './pages/DeleteStaff'
+import FeedbackForm from './pages/Feedback'
 
 
 export const AuthContext = createContext()
@@ -38,7 +42,7 @@ function App() {
           <Route path='/admin/order-history' element={<OrderHistoryAdmin/>} />
           <Route path='/admin/manage-hub' element={<ManageHub/>} />
           <Route path='/user' element={<UserDashboard />} />
-          <Route path='/add-courier' element={<AddCourier />} />
+          <Route path='/customer/add-courier' element={<AddCourier />} />
           <Route path='/view-couriers' element={<ViewCouriers />} />
           <Route path='/customer/homepage' element={<HomePage />} />
           <Route path='/customer/track-courier' element={<TrackCourier />} />
@@ -46,6 +50,10 @@ function App() {
           <Route path='/customer/order-history' element={<OrderHistory />} />
           <Route path='/staff/profile' element={<StaffProfile />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
+           <Route path='/staff/staff-details' element={<StaffDetails />} />
+             <Route path='/admin/add-staff' element={<AddStaff />} />
+              <Route path='/admin/delete-staff' element={<DeleteStaff />} />
+                <Route path='/customer/feedback' element={<FeedbackForm />} />
           <Route path='/' element={<Login />} />
         </Routes>
         

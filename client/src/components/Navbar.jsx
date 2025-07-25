@@ -106,8 +106,8 @@ function Navbar() {
                             </a>
                             <ul className='dropdown-menu'>
                                 <li>
-                                    <Link className='dropdown-item' to='/staff/add-staff'>
-                                        Add Staff
+                                    <Link className='dropdown-item' to='/staff/staff-details'>
+                                        Staff Details
                                     </Link>
                                 </li>
                                 <li>
@@ -133,6 +133,11 @@ function Navbar() {
                                 <li>
                                     <Link className='dropdown-item' to='/customer/homepage'>
                                         Home Page
+                                        </Link>
+                                </li>
+                                <li>
+                                    <Link className='dropdown-item' to='/customer/add-courier'>
+                                       Add Order
                                     </Link>
                                 </li>
                                 <li>
