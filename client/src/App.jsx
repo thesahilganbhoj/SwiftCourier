@@ -46,7 +46,7 @@ function App() {
           <Route path='/customer/order-history' element={<OrderHistory />} />
           <Route path='/staff/profile' element={<StaffProfile />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
-          <Route path='/' element={<Login />} />
+          <Route path='/' element={<HomePage />} />
         </Routes>
         
       </AuthContext.Provider>
