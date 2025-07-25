@@ -43,7 +43,7 @@ function App() {
           <Route path='/admin/manage-hub' element={<ManageHub/>} />
           <Route path='/user' element={<UserDashboard />} />
           <Route path='/customer/add-courier' element={<AddCourier />} />
-          <Route path='/view-couriers' element={<ViewCouriers />} />
+          {/* <Route path='/view-couriers' element={<ViewCouriers />} /> */}
           <Route path='/customer/homepage' element={<HomePage />} />
           <Route path='/customer/track-courier' element={<TrackCourier />} />
           <Route path='/customer/order-details' element={<OrderDetails />} />
@@ -54,7 +54,7 @@ function App() {
              <Route path='/admin/add-staff' element={<AddStaff />} />
               <Route path='/admin/delete-staff' element={<DeleteStaff />} />
                 <Route path='/customer/feedback' element={<FeedbackForm />} />
-          <Route path='/' element={<Login />} />
+          
           <Route path='/' element={<HomePage />} />
         </Routes>
         

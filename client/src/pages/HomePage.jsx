@@ -33,7 +33,7 @@ const SwiftCourierLanding = () => {
   const handleCTAClick = (action) => {
     switch (action) {
       case "Place Order":
-        navigate("/add-courier")
+        navigate("/customer/add-courier")
         break
       case "Track Order":
         navigate("/customer/track-courier")
@@ -42,10 +42,10 @@ const SwiftCourierLanding = () => {
         navigate("/customer/order-history")
         break
       case "Support & Help":
-        navigate("/customer/profile")
+        navigate("/customer/feedback")
         break
       case "Place Order Now":
-        navigate("/add-courier")
+        navigate("/customer/add-courier")
         break
       default:
         console.log("Unknown Action")
