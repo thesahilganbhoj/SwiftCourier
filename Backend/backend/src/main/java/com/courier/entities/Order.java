@@ -24,8 +24,9 @@ public class Order {
     @Column(name = "order_id")
     private Long orderId;
 
-    @Column(name = "customer_id", nullable = false)
-    private Integer customerId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @Column(name = "assigned_staff_id")
     private Integer assignedStaffId;
@@ -66,11 +67,9 @@ public class Order {
     @Column(name = "price")
     private double price;
     
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+   
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Order> feedback;
+	private List<Feedback> feedbackList;
 
   }
