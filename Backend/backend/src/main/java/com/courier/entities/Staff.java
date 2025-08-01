@@ -51,8 +51,6 @@ public class Staff {
 	
 	@OneToMany(mappedBy = "assignedStaff")
 	private List<Order> assignedOrders;
-	
-	@OneToMany(mappedBy="updatedByStaff")
-	private List<OrderStatusHistory> updatedStatusLogs;
+
 	
 }
