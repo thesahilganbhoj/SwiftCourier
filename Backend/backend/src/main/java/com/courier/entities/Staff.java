@@ -49,6 +49,9 @@ public class Staff {
 	@OneToOne(mappedBy="staff", cascade=CascadeType.ALL, orphanRemoval=true)
 	private StaffAvailability staffAvailability;
 	
+	@OneToMany(mappedBy = "assignedStaff")
+	private List<Order> assignedOrders;
+	
 	@OneToMany(mappedBy="updatedByStaff")
 	private List<OrderStatusHistory> updatedStatusLogs;
 	

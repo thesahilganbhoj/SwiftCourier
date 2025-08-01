@@ -28,8 +28,9 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @Column(name = "assigned_staff_id")
-    private Integer assignedStaffId;
+    @ManyToOne
+    @JoinColumn(name = "assigned_staff_id")
+    private Staff assignedStaff;
 
     @Column(name = "source_warehouse_id", nullable = false)
     private Integer sourceWarehouseId;
