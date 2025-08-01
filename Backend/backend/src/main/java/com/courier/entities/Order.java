@@ -1,14 +1,10 @@
-
 package com.courier.entities;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -63,13 +59,25 @@ public class Order {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     @Column(name = "price")
     private double price;
-    
-   
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Feedback> feedbackList;
+    private List<Feedback> feedbackList;
 
-  }
+    // One-to-Many mapping to RouteTracking
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RouteTracking> routeTrackingList = new ArrayList<>();
+
+    // Helper methods
+    public void addRouteTracking(RouteTracking tracking) {
+        routeTrackingList.add(tracking);
+        tracking.setOrder(this);
+    }
+
+    public void removeRouteTracking(RouteTracking tracking) {
+        routeTrackingList.remove(tracking);
+        tracking.setOrder(null);
+    }
+}
