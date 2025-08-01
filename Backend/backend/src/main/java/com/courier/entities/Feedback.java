@@ -25,8 +25,9 @@ public class Feedback {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long feedbackId;
-	@Column(name = "order_id")
-    private Long orderId;
+	@ManyToOne
+	@JoinColumn(name="order_id", nullable=false)
+	public Order order;
 	@Column(name = "customer_id")
 	private Long customerId;
 	@Column
@@ -36,10 +37,5 @@ public class Feedback {
 	
 	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;
-	
-	
-	@ManyToOne
-	@JoinColumn(name="order_id", nullable=false)
-	public Order order;
-	
+
 }
