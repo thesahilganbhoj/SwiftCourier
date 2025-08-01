@@ -27,10 +27,13 @@ public class StaffAvailability {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "staff_id")
 	private Long staffId;
+	
 	@Column(name = "current_location", nullable = false)
 	private String currentLocation;
+	
 	@Column(name = "is_available", nullable = false)
 	private boolean isAvailable;
+	
 	@Column(name = "last_updated", nullable = false)
 	private LocalDateTime lastUpdated;
 	
@@ -38,6 +41,5 @@ public class StaffAvailability {
     @MapsId
     @JoinColumn(name = "staff_id")
     private Staff staff;
-	
 	
 }
