@@ -1,5 +1,7 @@
 package com.courier.entities;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +26,9 @@ public class Warehouse {
 
     @Column(name = "contact_number", nullable = false)
     private String contactNumber;
+    
+    @OneToMany(mappedBy = "currentWarehouse")  // Back-reference
+    private List<Staff> staffList;
 
     // Custom constructor (without ID)
     public Warehouse(String city, String address, String contactNumber) {
