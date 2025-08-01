@@ -1,5 +1,8 @@
 package com.courier.entities;
 
-public class Staff {
 
+public class Staff {
+	
+	
+	
 }
