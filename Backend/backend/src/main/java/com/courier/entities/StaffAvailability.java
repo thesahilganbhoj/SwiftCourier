@@ -24,7 +24,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class StaffAvailability {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "staff_id")
 	private Long staffId;
 	
