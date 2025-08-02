@@ -51,4 +51,4 @@ node_modules/
 # json files of node
 .json
 
-Backend/backend/src/main/resources/application.properties
+
