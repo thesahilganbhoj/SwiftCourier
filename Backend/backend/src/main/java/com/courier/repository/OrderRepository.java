@@ -1,5 +1,11 @@
 package com.courier.repository;
 
-public interface OrderRepository {
+import com.courier.entities.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface OrderRepository extends JpaRepository<Order, Long> {
+//    List<Order> findByStaffIdAndStatus(Long staffId, String status);
+    List<Order> findByAssignedStaff_StaffIdAndStatus(Long staffId, String status);
 
 }

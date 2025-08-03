@@ -38,23 +38,26 @@ function App() {
         <Routes>
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
+
           <Route path='/admin/dashboard' element={<AdminDashboard />} />
           <Route path='/admin/order-history' element={<OrderHistoryAdmin />} />
           <Route path='/admin/manage-hub' element={<ManageHub />} />
-          <Route path='/user' element={<UserDashboard />} />
-          <Route path='/customer/add-courier' element={<AddCourier />} />
+          <Route path='/admin/add-staff' element={<AddStaff />} />
+          <Route path='/admin/manage-staff' element={<ManageStaff />} />
+          <Route path='/admin/delete-staff' element={<DeleteStaff />} />
+
+          {/* <Route path='/user' element={<UserDashboard />} /> */}
           {/* <Route path='/view-couriers' element={<ViewCouriers />} /> */}
+          <Route path='/customer/add-courier' element={<AddCourier />} />
           <Route path='/customer/homepage' element={<HomePage />} />
           <Route path='/customer/track-courier' element={<TrackCourier />} />
           <Route path='/customer/order-details' element={<OrderDetails />} />
           <Route path='/customer/order-history' element={<OrderHistory />} />
-          <Route path='/staff/profile' element={<StaffProfile />} />
           <Route path='/customer/profile' element={<CustomerProfile />} />
-          <Route path='/staff/staff-details' element={<StaffDetails />} />
-          <Route path='/admin/add-staff' element={<AddStaff />} />
-          <Route path='/admin/delete-staff' element={<DeleteStaff />} />
           <Route path='/customer/feedback' element={<FeedbackForm />} />
-          <Route path='/admin/manage-staff' element={<ManageStaff />} />
+
+          <Route path='/staff/profile' element={<StaffProfile />} />
+          <Route path='/staff/staff-details' element={<StaffDetails />} />
 
           <Route path='/' element={<HomePage />} />
         </Routes>

@@ -10,6 +10,8 @@ import com.courier.entities.Feedback;
 import com.courier.repository.CustomerRepository;
 import com.courier.repository.FeedbackRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
@@ -19,9 +21,10 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerRepository customerRepository;
 
     @Override
-    public void saveFeedback(Feedback feedback) {
-        feedbackRepo.save(feedback);
+    public Feedback saveFeedback(Feedback feedback) {
+        return feedbackRepo.save(feedback);
     }
+
     
     @Override
     public CustomerDTO getCustomerById(Long id) {
@@ -35,5 +38,27 @@ public class CustomerServiceImpl implements CustomerService {
             customer.getContactNumber(),
             customer.getAddress()
         );
+    }
+    
+    @Override
+    public CustomerDTO updateCustomerProfile(Long customerId, CustomerDTO updatedCustomer) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Customer not found with ID: " + customerId));
+
+        customer.setName(updatedCustomer.getName());
+        customer.setEmail(updatedCustomer.getEmail());
+        customer.setAddress(updatedCustomer.getAddress());
+
+        Customer saved = customerRepository.save(customer);
+        return mapToDTO(saved);
+    }
+
+    private CustomerDTO mapToDTO(Customer customer) {
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(customer.getCustomerId());
+        dto.setName(customer.getName());
+        dto.setEmail(customer.getEmail());
+        dto.setAddress(customer.getAddress());
+        return dto;
     }
 }

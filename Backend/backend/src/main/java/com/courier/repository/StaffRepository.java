@@ -1,5 +1,8 @@
 package com.courier.repository;
 
-public interface StaffRepository {
+import com.courier.entities.Staff;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StaffRepository extends JpaRepository<Staff, Long> {
 
 }
