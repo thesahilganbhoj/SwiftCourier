@@ -36,6 +36,13 @@ public class Order {
 
     @Column(name = "sender_name", nullable = false)
     private String senderName;
+    
+    @Column(name="source_city")
+    private String sourceCity;
+    
+
+    @Column(name="destination_city")
+    private String destinationCity;
 
     @Column(name = "receiver_name", nullable = false)
     private String receiverName;
