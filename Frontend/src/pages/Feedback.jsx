@@ -1,5 +1,6 @@
 // FeedbackForm.jsx
 import React, { useState } from 'react';
+import { submitFeedback } from '../services/feedback'
 import Navbar from '../components/Navbar'
 export default function FeedbackForm() {
   const [formData, setFormData] = useState({
@@ -17,11 +18,30 @@ export default function FeedbackForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Submitted Feedback:', formData);
-    // You can add your API POST call here
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  const payload = {
+    order: {
+      orderId: parseInt(formData.courierId),
+    },
+    customerId: 1, // Later replace with: parseInt(localStorage.getItem("customerId"))
+    rating: parseInt(formData.rating),
+    comment: formData.comment,
+    createdAt: null, // backend will handle it
+  }
+
+  try {
+    const result = await submitFeedback(payload)
+    alert('Feedback submitted successfully')
+    handleReset() // optional reset function
+  } catch (err) {
+    alert('Failed to submit feedback')
+    console.log(err)
+  }
+}
+
+
 
   const handleReset = () => {
     setFormData({
