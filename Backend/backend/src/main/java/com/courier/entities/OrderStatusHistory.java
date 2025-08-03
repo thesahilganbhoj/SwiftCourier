@@ -24,8 +24,8 @@ import lombok.Setter;
 public class OrderStatusHistory {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="status_Id")
-	Integer statusId;
+	@Column(name="status_id")
+	private Integer statusId;
 	
 	@ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -48,5 +48,7 @@ public class OrderStatusHistory {
 
     @Column(name = "notes")
     private String notes;
+    
+    
     
 }

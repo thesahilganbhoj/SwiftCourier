@@ -37,6 +37,9 @@ public class Order {
     @Column(name = "sender_name", nullable = false)
     private String senderName;
     
+    @Column(name = "sender_address", nullable = false)
+    private String senderAddress;
+    
     @Column(name="source_city")
     private String sourceCity;
     
@@ -55,6 +58,9 @@ public class Order {
 
     @Column(name = "weight", nullable = false)
     private Double weight;
+    
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "status", nullable = false)
     private String status;

@@ -23,6 +23,9 @@ public class Warehouse {
 
     @Column(name = "address", nullable = false)
     private String address;
+    
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "contact_number", nullable = false)
     private String contactNumber;
