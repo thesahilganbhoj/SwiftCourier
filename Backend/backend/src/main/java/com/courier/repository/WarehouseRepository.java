@@ -1,5 +1,7 @@
 package com.courier.repository;
 
-public interface WarehouseRepository {
+import com.courier.entities.Warehouse;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+public interface WarehouseRepository extends JpaRepository<Warehouse, Integer> {
 }
