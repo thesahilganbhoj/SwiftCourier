@@ -9,6 +9,7 @@ import com.courier.dto.ApiResponse;
 import com.courier.dto.CustomerDTO;
 import com.courier.dto.CustomerOrderListDTO;
 import com.courier.dto.CustomerOrderRespDTO;
+import com.courier.dto.PendingOrderDTO;
 import com.courier.service.CustomerService;
 
 import lombok.AllArgsConstructor;
@@ -58,6 +59,19 @@ public class CustomerController {
         List<CustomerOrderListDTO> orders = customerService.getOrdersByCustomerId(id);
         return ResponseEntity.ok(orders);
     }
+    
+ // Get all pending orders
+    @GetMapping("/orders/pending")
+    public ResponseEntity<List<PendingOrderDTO>> getPendingOrders() {
+        return ResponseEntity.ok(customerService.getAllPendingOrders());
+    }
+
+    // Track order by tracking ID
+    @GetMapping("/orders/track/{trackingId}")
+    public ResponseEntity<PendingOrderDTO> trackOrder(@PathVariable String trackingId) {
+        return ResponseEntity.ok(customerService.trackOrderByTrackingId(trackingId));
+    }
+
 
 
 }

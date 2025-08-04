@@ -9,6 +9,7 @@ import com.courier.custom_exceptions.ResourceNotFoundException;
 import com.courier.dto.CustomerDTO;
 import com.courier.dto.CustomerOrderListDTO;
 import com.courier.dto.CustomerOrderRespDTO;
+import com.courier.dto.PendingOrderDTO;
 import com.courier.entities.Customer;
 import com.courier.entities.Feedback;
 import com.courier.entities.Order;
@@ -99,5 +100,32 @@ public class CustomerServiceImpl implements CustomerService {
                              order.getStatus()))
                      .toList();
     }
+    
+    @Override
+    public List<PendingOrderDTO> getAllPendingOrders() {
+        List<Order> pendingOrders = orderRepository.findByStatus("Pending");
+        return pendingOrders.stream()
+                .map(order -> new PendingOrderDTO(
+                		String.valueOf(order.getOrderId()),
+                        order.getReceiverName(),
+                        order.getStatus(),
+                        order.getTrackingId()))
+                .toList();
+    }
+
+    @Override
+    public PendingOrderDTO trackOrderByTrackingId(String trackingId) {
+        Order order = orderRepository.findByTrackingId(trackingId);
+        if (order == null || !"Pending".equals(order.getStatus())) {
+            throw new RuntimeException("Pending order not found for tracking ID: " + trackingId);
+        }
+        return new PendingOrderDTO(
+                "ORD" + String.format("%03d", order.getOrderId()),
+                order.getReceiverName(),
+                order.getStatus(),
+                order.getTrackingId()
+        );
+    }
+
 
 }
