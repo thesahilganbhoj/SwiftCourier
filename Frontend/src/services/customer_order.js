@@ -23,3 +23,25 @@ export const getOrderDetails = async (orderId) => {
     throw error;
   }
 };
+
+// Get all pending orders
+export const getPendingOrders = async () => {
+  try {
+    const res = await axios.get(`${BASE_URL}/orders/pending`);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to fetch pending orders", err);
+    throw err;
+  }
+};
+
+// Track order by tracking ID
+export const trackOrderByTrackingId = async (trackingId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/orders/track/${trackingId}`);
+    return res.data;
+  } catch (err) {
+    console.error("Tracking failed", err);
+    throw err;
+  }
+};
