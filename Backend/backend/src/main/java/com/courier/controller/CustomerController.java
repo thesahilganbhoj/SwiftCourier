@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.courier.entities.Feedback;
 import com.courier.dto.ApiResponse;
 import com.courier.dto.CustomerDTO;
+import com.courier.dto.CustomerOrderRespDTO;
 import com.courier.service.CustomerService;
 
 import lombok.AllArgsConstructor;
@@ -44,5 +45,10 @@ public class CustomerController {
     }
 
 
+    @GetMapping("/orders/{id}")
+    public ResponseEntity<CustomerOrderRespDTO> getOrderDetails(@PathVariable Long id) {
+    	CustomerOrderRespDTO order = customerService.getOrderDetailsById(id);
+        return ResponseEntity.ok(order);
+    }
 
 }

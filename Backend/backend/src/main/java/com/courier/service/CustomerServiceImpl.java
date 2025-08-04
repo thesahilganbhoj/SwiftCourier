@@ -5,10 +5,13 @@ import org.springframework.stereotype.Service;
 
 import com.courier.custom_exceptions.ResourceNotFoundException;
 import com.courier.dto.CustomerDTO;
+import com.courier.dto.CustomerOrderRespDTO;
 import com.courier.entities.Customer;
 import com.courier.entities.Feedback;
+import com.courier.entities.Order;
 import com.courier.repository.CustomerRepository;
 import com.courier.repository.FeedbackRepository;
+import com.courier.repository.OrderRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -19,6 +22,8 @@ public class CustomerServiceImpl implements CustomerService {
     private FeedbackRepository feedbackRepo;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Override
     public Feedback saveFeedback(Feedback feedback) {
@@ -60,5 +65,24 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setEmail(customer.getEmail());
         dto.setAddress(customer.getAddress());
         return dto;
+    }
+    
+    @Override
+    public CustomerOrderRespDTO getOrderDetailsById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        return new CustomerOrderRespDTO(
+            order.getOrderId(),
+            order.getTrackingId(),
+            order.getCreatedAt() != null ? order.getCreatedAt().toLocalDate().toString() : "",
+            order.getDescription(),
+            order.getSenderName(),
+            order.getSenderAddress(),
+            order.getReceiverName(),
+            order.getReceiverContact(),
+            order.getReceiverAddress(),
+            order.getWeight()
+        );
     }
 }
