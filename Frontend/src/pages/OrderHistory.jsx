@@ -1,22 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import { getOrdersByCustomerId } from "../services/customer_order";
 
 function OrderHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [orders, setOrders] = useState([]);
 
-  const sampleOrders = [
-    { orderId: "ORD001", receiver: "John Doe", status: "Delivered" },
-    { orderId: "ORD002", receiver: "Alice Smith", status: "Pending" },
-    { orderId: "ORD003", receiver: "Bob Johnson", status: "Delivered" },
-    { orderId: "ORD004", receiver: "Charlie Brown", status: "Pending" },
-  ];
+  const customerId = 1; // 🔁 Replace with actual logged-in customer ID
 
-  // ✅ Filter logic for search + status
-  const filteredOrders = sampleOrders.filter((order) => {
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await getOrdersByCustomerId(customerId);
+        setOrders(data);
+      } catch (error) {
+        alert("Failed to load orders");
+      }
+    };
+
+    fetchOrders();
+  }, [customerId]);
+
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.receiver.toLowerCase().includes(searchTerm.toLowerCase());
+      order.receiverName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === "All" ? true : order.status === statusFilter;
@@ -31,9 +40,8 @@ function OrderHistory() {
       <div className="container py-4">
         <h2 className="mb-4">Order History</h2>
 
-        {/* ✅ Search + Filter Row */}
+        {/* 🔍 Search + Filter */}
         <div className="row mb-4 justify-content-center">
-          {/* Search Box */}
           <div className="col-md-4 mb-2">
             <input
               type="text"
@@ -43,8 +51,6 @@ function OrderHistory() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-
-          {/* Status Filter Dropdown */}
           <div className="col-md-3 mb-2">
             <select
               className="form-select"
@@ -54,11 +60,12 @@ function OrderHistory() {
               <option value="All">All Status</option>
               <option value="Delivered">Delivered</option>
               <option value="Pending">Pending</option>
+              <option value="In Transit">In Transit</option> {/* ✅ New option */}
             </select>
           </div>
         </div>
 
-        {/* ✅ Orders Table */}
+        {/* 📋 Orders Table */}
         <div className="card shadow-sm">
           <div className="card-body">
             {filteredOrders.length > 0 ? (
@@ -75,13 +82,17 @@ function OrderHistory() {
                     {filteredOrders.map((order, index) => (
                       <tr key={index}>
                         <td>{order.orderId}</td>
-                        <td>{order.receiver}</td>
+                        <td>{order.receiverName}</td>
                         <td>
                           <span
                             className={`badge ${
                               order.status === "Delivered"
                                 ? "bg-success"
-                                : "bg-warning text-dark"
+                                : order.status === "Pending"
+                                ? "bg-warning text-dark"
+                                : order.status === "In Transit"
+                                ? "bg-info text-dark"
+                                : "bg-secondary"
                             }`}
                           >
                             {order.status}
