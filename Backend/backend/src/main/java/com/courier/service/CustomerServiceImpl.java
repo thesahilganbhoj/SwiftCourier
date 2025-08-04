@@ -1,10 +1,13 @@
 package com.courier.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.courier.custom_exceptions.ResourceNotFoundException;
 import com.courier.dto.CustomerDTO;
+import com.courier.dto.CustomerOrderListDTO;
 import com.courier.dto.CustomerOrderRespDTO;
 import com.courier.entities.Customer;
 import com.courier.entities.Feedback;
@@ -85,4 +88,16 @@ public class CustomerServiceImpl implements CustomerService {
             order.getWeight()
         );
     }
+    
+    @Override
+    public List<CustomerOrderListDTO> getOrdersByCustomerId(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomerCustomerId(customerId);
+        return orders.stream()
+                     .map(order -> new CustomerOrderListDTO(
+                    		 String.valueOf(order.getOrderId()),
+                             order.getReceiverName(),
+                             order.getStatus()))
+                     .toList();
+    }
+
 }

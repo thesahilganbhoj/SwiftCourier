@@ -7,12 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import com.courier.entities.Feedback;
 import com.courier.dto.ApiResponse;
 import com.courier.dto.CustomerDTO;
+import com.courier.dto.CustomerOrderListDTO;
 import com.courier.dto.CustomerOrderRespDTO;
 import com.courier.service.CustomerService;
 
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/customers")
@@ -45,10 +47,17 @@ public class CustomerController {
     }
 
 
-    @GetMapping("/orders/{id}")
+    @GetMapping("/orders/{id}") // "id" is order id
     public ResponseEntity<CustomerOrderRespDTO> getOrderDetails(@PathVariable Long id) {
     	CustomerOrderRespDTO order = customerService.getOrderDetailsById(id);
         return ResponseEntity.ok(order);
     }
+    
+    @GetMapping("/{id}/orders") // "id" is customer id
+    public ResponseEntity<List<CustomerOrderListDTO>> getAllOrdersForCustomer(@PathVariable Long id) {
+        List<CustomerOrderListDTO> orders = customerService.getOrdersByCustomerId(id);
+        return ResponseEntity.ok(orders);
+    }
+
 
 }
