@@ -8,14 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.courier.dto.ManageStaffAdminDTO;
 import com.courier.dto.OrderAdminRespDTO;
+import com.courier.dto.WarehouseDTO;
 import com.courier.entities.Admin;
 import com.courier.service.AdminService;
+import com.courier.service.WarehouseService;
+
+import jakarta.validation.Valid;
 
 
 
@@ -25,6 +30,8 @@ public class AdminController {
 
 	@Autowired
 	private AdminService adminService;
+	@Autowired
+	private WarehouseService warehouseService;
 	 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getAdminById(@PathVariable Long id){
@@ -70,4 +77,28 @@ public class AdminController {
 	        }
 	        return ResponseEntity.ok(staffList);
 	    }
+	 
+	 
+	 
+	 //Warehouse Services ---------------------------
+	 
+	   @PostMapping("/addWarehouse")
+	   public ResponseEntity<String> addWarehouse(@RequestBody WarehouseDTO warehouseDTO) {
+	        String response = warehouseService.addWarehouse(warehouseDTO);
+	        return ResponseEntity.ok(response); // Returns: "Warehouse added successfully!"
+	    }
+
+	    @GetMapping("/getWareHouseById/{warehouseId}")
+	    public ResponseEntity<?> getWarehouseById(@PathVariable Long warehouseId) {
+	        return ResponseEntity.ok(warehouseService.getWarehouseById(warehouseId));
+	    }
+
+	    @GetMapping("/getAllWarehouses")
+	    public ResponseEntity<List<WarehouseDTO>> getAllWarehouses() {
+	        return ResponseEntity.ok(warehouseService.getAllWarehouses());
+	    }
+	    
+	   
+	    
+	 
 }
