@@ -1,56 +1,48 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import {
-  getPendingOrders,
-  acceptOrder,
   getAcceptedTasks,
-  updateOrderStatus,
-  updateWarehouse,
-  getOrderDetails,
-} from "../services/staff_order"
+  acceptOrder,
+  getPendingOrders,
+  getStaffAvailability,
+  updateStaffAvailability,
+} from "../services/staff"
 
-function StaffDetails() {
-  const [activeTab, setActiveTab] = useState("pending")
-  const [pendingOrders, setPendingOrders] = useState([])
+export default function StaffDetails() {
+  const [requests, setRequests] = useState([])
   const [acceptedTasks, setAcceptedTasks] = useState([])
   const [selectedTask, setSelectedTask] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [staffId] = useState(1) // Get from authentication context
 
-  // Status update form state
-  const [statusUpdate, setStatusUpdate] = useState({
-    orderId: "",
-    newStatus: "",
-    staffId: staffId,
-  })
+  // Availability state
+  const [availability, setAvailability] = useState(null)
+  const [updatingAvailability, setUpdatingAvailability] = useState(false)
 
-  // Warehouse update form state
-  const [warehouseUpdate, setWarehouseUpdate] = useState({
-    orderId: "",
-    newWarehouseId: "",
-    staffId: staffId,
-  })
+  const { staffId: paramStaffId } = useParams()
+  const navigate = useNavigate()
 
+  // Get staff ID from URL params or default to 1 for testing
+  const staffId = paramStaffId ? Number.parseInt(paramStaffId) : 1
+
+  // Fetch data on component mount
   useEffect(() => {
-    if (activeTab === "pending") {
-      fetchPendingOrders()
-    } else if (activeTab === "tasks") {
-      fetchAcceptedTasks()
-    }
-  }, [activeTab])
+    fetchPendingOrders()
+    fetchAcceptedTasks()
+    fetchStaffAvailability()
+  }, [staffId])
 
   const fetchPendingOrders = async () => {
     try {
       setLoading(true)
-      setError(null)
       const orders = await getPendingOrders()
-      setPendingOrders(orders || [])
+      setRequests(orders || [])
     } catch (err) {
-      setError("Failed to fetch pending orders")
-      console.error(err)
+      console.error("Failed to fetch pending orders:", err)
+      setError("Failed to load pending orders")
     } finally {
       setLoading(false)
     }
@@ -59,356 +51,486 @@ function StaffDetails() {
   const fetchAcceptedTasks = async () => {
     try {
       setLoading(true)
-      setError(null)
       const tasks = await getAcceptedTasks(staffId)
       setAcceptedTasks(tasks || [])
+      if (tasks && tasks.length > 0) {
+        setSelectedTask(tasks[0]) // Select first task by default
+      } else {
+        setSelectedTask(null) // Clear selection if no tasks
+      }
     } catch (err) {
-      setError("Failed to fetch accepted tasks")
-      console.error(err)
+      console.error("Failed to fetch accepted tasks:", err)
+      setAcceptedTasks([])
+      setSelectedTask(null)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAcceptOrder = async (orderId) => {
+  const fetchStaffAvailability = async () => {
     try {
-      const orderData = {
-        orderId: orderId,
+      const availabilityData = await getStaffAvailability(staffId)
+      setAvailability(availabilityData)
+    } catch (err) {
+      console.error("Failed to fetch staff availability:", err)
+      // Set default availability if fetch fails
+      setAvailability({
         staffId: staffId,
+        isAvailable: true,
+        currentLocation: "Unknown",
+        lastUpdated: new Date().toISOString(),
+      })
+    }
+  }
+
+  const handleAvailabilityUpdate = async (newAvailabilityStatus) => {
+    try {
+      setUpdatingAvailability(true)
+      setError(null)
+
+      const updateData = {
+        isAvailable: newAvailabilityStatus,
+        currentLocation: availability?.currentLocation || "Unknown",
       }
-      await acceptOrder(orderData)
+
+      console.log("Updating availability with data:", updateData)
+
+      const response = await updateStaffAvailability(staffId, updateData)
+      console.log("Availability update response:", response)
+
+      // Update local state
+      setAvailability((prev) => ({
+        ...prev,
+        isAvailable: newAvailabilityStatus,
+        lastUpdated: new Date().toLocaleString(),
+      }))
+
+      const statusText = newAvailabilityStatus ? "Available" : "Unavailable"
+      alert(`Availability updated to ${statusText} successfully!`)
+    } catch (err) {
+      setError("Failed to update availability")
+      console.error("Error updating availability:", err)
+      alert("Failed to update availability. Please try again.")
+    } finally {
+      setUpdatingAvailability(false)
+    }
+  }
+
+  const handleAccept = async (request) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const acceptData = {
+        orderId: request.orderId,
+        staffId: staffId,
+        senderAddress: request.senderAddress,
+        receiverAddress: request.receiverAddress,
+        weight: request.weight,
+        description: request.description,
+      }
+
+      await acceptOrder(acceptData)
+
+      // Remove from requests and refresh accepted tasks
+      setRequests(requests.filter((req) => req.orderId !== request.orderId))
+      await fetchAcceptedTasks()
+
       alert("Order accepted successfully!")
-      fetchPendingOrders() // Refresh pending orders
-      if (activeTab === "tasks") {
-        fetchAcceptedTasks() // Refresh tasks if on tasks tab
-      }
     } catch (err) {
-      alert("Failed to accept order")
-      console.error(err)
+      setError("Failed to accept order. Please try again.")
+      console.error("Error accepting order:", err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleTaskClick = async (task) => {
-    try {
-      const orderDetails = await getOrderDetails(task.orderId)
-      setSelectedTask(orderDetails)
-    } catch (err) {
-      console.error("Failed to fetch order details:", err)
-      setSelectedTask(task) // Fallback to basic task info
+  const handleDecline = (requestId) => {
+    setRequests(requests.filter((req) => req.orderId !== requestId))
+  }
+
+  const handleUpdateStatus = () => {
+    if (!selectedTask) {
+      alert("Please select a task first")
+      return
+    }
+    // Navigate to update status page with task details
+    navigate(`/staff/update-status/${staffId}/${selectedTask.orderId}`)
+  }
+
+  // Helper function to get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case "DELIVERED":
+        return "bg-success"
+      case "IN_TRANSIT":
+        return "bg-warning"
+      case "OUT_FOR_DELIVERY":
+        return "bg-info"
+      case "PICKED_UP":
+        return "bg-primary"
+      case "AT_SOURCE_WAREHOUSE":
+        return "bg-secondary"
+      case "AT_DESTINATION_WAREHOUSE":
+        return "bg-dark"
+      case "ACCEPTED":
+        return "bg-info"
+      case "CANCELLED":
+        return "bg-danger"
+      default:
+        return "bg-secondary"
     }
   }
 
-  const handleStatusUpdate = async (e) => {
-    e.preventDefault()
-    try {
-      await updateOrderStatus(statusUpdate)
-      alert("Order status updated successfully!")
-      setStatusUpdate({ orderId: "", newStatus: "", staffId: staffId })
-      fetchAcceptedTasks() // Refresh tasks
-    } catch (err) {
-      alert("Failed to update order status")
-      console.error(err)
+  // Helper function to get readable status label
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "PICKED_UP":
+        return "Picked Up"
+      case "AT_SOURCE_WAREHOUSE":
+        return "At Source Warehouse"
+      case "IN_TRANSIT":
+        return "In Transit"
+      case "AT_DESTINATION_WAREHOUSE":
+        return "At Destination Warehouse"
+      case "OUT_FOR_DELIVERY":
+        return "Out for Delivery"
+      case "DELIVERED":
+        return "Delivered"
+      case "CANCELLED":
+        return "Cancelled"
+      case "ACCEPTED":
+        return "Accepted"
+      default:
+        return status
     }
   }
 
-  const handleWarehouseUpdate = async (e) => {
-    e.preventDefault()
-    try {
-      await updateWarehouse(warehouseUpdate)
-      alert("Warehouse updated successfully!")
-      setWarehouseUpdate({ orderId: "", newWarehouseId: "", staffId: staffId })
-      fetchAcceptedTasks() // Refresh tasks
-    } catch (err) {
-      alert("Failed to update warehouse")
-      console.error(err)
+  // Helper function to get next possible status
+  const getNextStatus = (currentStatus) => {
+    switch (currentStatus) {
+      case "ACCEPTED":
+        return "Pick up the package"
+      case "PICKED_UP":
+        return "Deliver to source warehouse"
+      case "OUT_FOR_DELIVERY":
+        return "Deliver to receiver"
+      default:
+        return "Update status"
     }
   }
 
   return (
-    <div>
+    <>
       <Navbar />
-      <div className="container py-4">
-        <div className="row">
-          <div className="col-12">
-            <h2 className="mb-4">Staff Dashboard</h2>
+      <div className="container-fluid py-3">
+        {/* Error Alert */}
+        {error && (
+          <div className="alert alert-danger alert-dismissible fade show" role="alert">
+            {error}
+            <button type="button" className="btn-close" onClick={() => setError(null)}></button>
+          </div>
+        )}
 
-            {error && (
-              <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                {error}
-                <button type="button" className="btn-close" onClick={() => setError(null)}></button>
+        {/* Staff ID Display with Availability */}
+        <div className="row mb-4">
+          <div className="col-12 d-flex justify-content-between align-items-center pe-5">
+            <div>
+              <h4 className="mb-0">Staff Dashboard - ID: {staffId}</h4>
+              <small className="text-muted">Manage your delivery tasks through the complete delivery process</small>
+            </div>
+
+            {/* Availability Dropdown */}
+            <div className="dropdown">
+              <button
+                className={`btn ${availability?.isAvailable ? "btn-success" : "btn-danger"} dropdown-toggle`}
+                type="button"
+                id="availabilityDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                disabled={updatingAvailability}
+              >
+                {updatingAvailability ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <i className={`bi ${availability?.isAvailable ? "bi-check-circle" : "bi-x-circle"} me-2`}></i>
+                    {availability?.isAvailable ? "Available" : "Unavailable"}
+                  </>
+                )}
+              </button>
+              <ul className="dropdown-menu" aria-labelledby="availabilityDropdown">
+                <li>
+                  <button
+                    className={`dropdown-item ${availability?.isAvailable ? "active" : ""}`}
+                    onClick={() => handleAvailabilityUpdate(true)}
+                    disabled={updatingAvailability}
+                  >
+                    <i className="bi bi-check-circle text-success me-2"></i>
+                    Available
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`dropdown-item ${!availability?.isAvailable ? "active" : ""}`}
+                    onClick={() => handleAvailabilityUpdate(false)}
+                    disabled={updatingAvailability}
+                  >
+                    <i className="bi bi-x-circle text-danger me-2"></i>
+                    Unavailable
+                  </button>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <span className="dropdown-item-text text-muted small">
+                    <i className="bi bi-clock me-1"></i>
+                    Last updated:{" "}
+                    {availability?.lastUpdated ? new Date(availability.lastUpdated).toLocaleString() : "Unknown"}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery Process Flow */}
+        <div className="row mb-4 justify-content-center">
+          <div className="col-lg-10">
+            <div className="alert alert-light border" role="alert">
+              <h6 className="alert-heading">
+                <i className="bi bi-diagram-3 me-2"></i>
+                Delivery Process Flow
+              </h6>
+              <div className="d-flex flex-wrap gap-2 mt-2">
+                <span className="badge bg-info">Accept Order</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-primary">Pick Up</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-secondary">Source Warehouse</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-warning">In Transit (Admin)</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-dark">Destination Warehouse (Admin)</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-info">Out for Delivery</span>
+                <i className="bi bi-arrow-right text-muted"></i>
+                <span className="badge bg-success">Delivered</span>
               </div>
-            )}
+            </div>
+          </div>
+        </div>
 
-            {/* Navigation Tabs */}
-            <ul className="nav nav-tabs mb-4">
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "pending" ? "active" : ""}`}
-                  onClick={() => setActiveTab("pending")}
-                >
-                  Pending Requests ({pendingOrders.length})
-                </button>
-              </li>
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "tasks" ? "active" : ""}`}
-                  onClick={() => setActiveTab("tasks")}
-                >
-                  My Tasks ({acceptedTasks.length})
-                </button>
-              </li>
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "update" ? "active" : ""}`}
-                  onClick={() => setActiveTab("update")}
-                >
-                  Update Orders
-                </button>
-              </li>
-            </ul>
+        {/* Requests Section */}
+        <div className="row mb-4 justify-content-center">
+          <div className="col-lg-10">
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h4 className="mb-4">
+                  <i className="bi bi-inbox me-2"></i>
+                  Pending Requests (Admin Assigned)
+                </h4>
 
-            {/* Loading Spinner */}
-            {loading && (
-              <div className="text-center py-4">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            )}
-
-            {/* Pending Orders Tab */}
-            {activeTab === "pending" && !loading && (
-              <div className="row">
-                <div className="col-12">
-                  <h4>Available Orders</h4>
-                  {pendingOrders.length === 0 ? (
-                    <div className="alert alert-info">
-                      <i className="bi bi-info-circle me-2"></i>
-                      No pending orders available at the moment.
+                {loading && requests.length === 0 ? (
+                  <div className="text-center">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
                     </div>
-                  ) : (
-                    <div className="row">
-                      {pendingOrders.map((order) => (
-                        <div key={order.orderId} className="col-md-6 col-lg-4 mb-3">
-                          <div className="card h-100">
-                            <div className="card-body">
-                              <h6 className="card-title">Order #{order.orderId}</h6>
-                              <p className="card-text">
-                                <strong>From:</strong> {order.senderAddress}
-                                <br />
-                                <strong>To:</strong> {order.receiverAddress}
-                                <br />
-                                <strong>Priority:</strong>
-                                <span
-                                  className={`badge ms-1 ${
-                                    order.priority === "HIGH"
-                                      ? "bg-danger"
-                                      : order.priority === "MEDIUM"
-                                        ? "bg-warning"
-                                        : "bg-success"
-                                  }`}
-                                >
-                                  {order.priority}
-                                </span>
-                              </p>
-                              <button
-                                className="btn btn-primary btn-sm"
-                                onClick={() => handleAcceptOrder(order.orderId)}
-                              >
-                                Accept Order
-                              </button>
+                    <p className="mt-2">Loading pending requests...</p>
+                  </div>
+                ) : requests.length === 0 ? (
+                  <div className="alert alert-info">
+                    <i className="bi bi-info-circle me-2"></i>
+                    No pending requests assigned by admin at the moment.
+                  </div>
+                ) : (
+                  requests.map((request) => (
+                    <div key={request.orderId} className="card mb-3 border-primary">
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-md-8">
+                            <div className="mb-2">
+                              <strong>Order ID:</strong> {request.orderId}
+                            </div>
+                            <div className="mb-2">
+                              <strong>Tracking ID:</strong> {request.trackingId}
+                            </div>
+                            <div className="mb-2">
+                              <strong>Sender:</strong> {request.senderName}
+                            </div>
+                            <div className="mb-2">
+                              <strong>Receiver:</strong> {request.receiverName}
+                            </div>
+                            <div className="mb-2">
+                              <strong>Receiver Address:</strong> {request.receiverAddress}
+                            </div>
+                            <div className="mb-2">
+                              <strong>Weight:</strong> {request.weight} kg
+                            </div>
+                            <div className="mb-2">
+                              <strong>Price:</strong> ₹{request.price}
+                            </div>
+                          </div>
+                          <div className="col-md-4 d-flex flex-column gap-2 justify-content-end">
+                            <button
+                              className="btn btn-success"
+                              onClick={() => handleAccept(request)}
+                              disabled={loading}
+                            >
+                              <i className="bi bi-check-lg me-2"></i>
+                              {loading ? "Accepting..." : "Accept Order"}
+                            </button>
+                            <button
+                              className="btn btn-outline-secondary"
+                              onClick={() => handleDecline(request.orderId)}
+                            >
+                              <i className="bi bi-x-lg me-2"></i>
+                              Decline
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Accepted Tasks Section */}
+        <div className="row mb-4 justify-content-center">
+          <div className="col-lg-10">
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h4 className="mb-4">
+                  <i className="bi bi-clipboard-check me-2"></i>
+                  My Active Tasks (Staff ID: {staffId})
+                </h4>
+
+                {acceptedTasks.length === 0 ? (
+                  <div className="alert alert-info">
+                    <i className="bi bi-clipboard-check me-2"></i>
+                    No active tasks. Tasks remain active until delivered to source warehouse or final delivery.
+                  </div>
+                ) : (
+                  <div className="row">
+                    <div className="col-md-4">
+                      <h6>Active Task List:</h6>
+                      <div className="list-group">
+                        {acceptedTasks.map((task) => (
+                          <button
+                            key={task.orderId}
+                            type="button"
+                            className={`list-group-item list-group-item-action ${
+                              selectedTask?.orderId === task.orderId ? "active" : ""
+                            }`}
+                            onClick={() => setSelectedTask(task)}
+                          >
+                            <div className="d-flex w-100 justify-content-between">
+                              <h6 className="mb-1">Order #{task.orderId}</h6>
+                              <small className={`badge ${getStatusBadgeClass(task.status)}`}>
+                                {getStatusLabel(task.status)}
+                              </small>
+                            </div>
+                            <p className="mb-1">{task.receiverName}</p>
+                            <small>{task.trackingId}</small>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="col-md-8">
+                      {selectedTask && (
+                        <div className="card">
+                          <div className="card-header d-flex justify-content-between align-items-center">
+                            <h6 className="mb-0">Task Details - Order #{selectedTask.orderId}</h6>
+                            <span className={`badge ${getStatusBadgeClass(selectedTask.status)} fs-6`}>
+                              {getStatusLabel(selectedTask.status)}
+                            </span>
+                          </div>
+                          <div className="card-body">
+                            <div className="row">
+                              <div className="col-md-6">
+                                <div className="mb-3">
+                                  <strong>Tracking ID:</strong> {selectedTask.trackingId}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Sender:</strong> {selectedTask.senderName}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Receiver:</strong> {selectedTask.receiverName}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Contact:</strong> {selectedTask.receiverContact}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Weight:</strong> {selectedTask.weight} kg
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <div className="mb-3">
+                                  <strong>Receiver Address:</strong> {selectedTask.receiverAddress}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Price:</strong> ₹{selectedTask.price}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Source Warehouse:</strong> {selectedTask.sourceWarehouseId}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Destination Warehouse:</strong> {selectedTask.destinationWarehouseId}
+                                </div>
+                                <div className="mb-3">
+                                  <strong>Created:</strong>{" "}
+                                  {selectedTask.createdAt
+                                    ? new Date(selectedTask.createdAt).toLocaleDateString()
+                                    : "N/A"}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Next Action Hint */}
+                            <div className="alert alert-light border-start border-primary border-4" role="alert">
+                              <i className="bi bi-lightbulb me-2"></i>
+                              <strong>Next Action:</strong> {getNextStatus(selectedTask.status)}
                             </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* My Tasks Tab */}
-            {activeTab === "tasks" && !loading && (
-              <div className="row">
-                <div className="col-md-6">
-                  <h4>My Accepted Tasks</h4>
-                  {acceptedTasks.length === 0 ? (
-                    <div className="alert alert-info">
-                      <i className="bi bi-info-circle me-2"></i>
-                      You haven't accepted any tasks yet.
-                    </div>
-                  ) : (
-                    <div className="list-group">
-                      {acceptedTasks.map((task) => (
-                        <button
-                          key={task.orderId}
-                          className="list-group-item list-group-item-action"
-                          onClick={() => handleTaskClick(task)}
-                        >
-                          <div className="d-flex w-100 justify-content-between">
-                            <h6 className="mb-1">Order #{task.orderId}</h6>
-                            <span
-                              className={`badge ${
-                                task.status === "DELIVERED"
-                                  ? "bg-success"
-                                  : task.status === "IN_TRANSIT"
-                                    ? "bg-primary"
-                                    : task.status === "PICKED_UP"
-                                      ? "bg-warning"
-                                      : "bg-secondary"
-                              }`}
-                            >
-                              {task.status}
-                            </span>
-                          </div>
-                          <p className="mb-1">
-                            {task.senderAddress} → {task.receiverAddress}
-                          </p>
-                          <small>Click to view details</small>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="col-md-6">
-                  <h4>Task Details</h4>
-                  {selectedTask ? (
-                    <div className="card">
-                      <div className="card-body">
-                        <h6 className="card-title">Order #{selectedTask.orderId}</h6>
-                        <div className="mb-2">
-                          <strong>Status:</strong>
-                          <span
-                            className={`badge ms-2 ${
-                              selectedTask.status === "DELIVERED"
-                                ? "bg-success"
-                                : selectedTask.status === "IN_TRANSIT"
-                                  ? "bg-primary"
-                                  : selectedTask.status === "PICKED_UP"
-                                    ? "bg-warning"
-                                    : "bg-secondary"
-                            }`}
-                          >
-                            {selectedTask.status}
-                          </span>
-                        </div>
-                        <p>
-                          <strong>From:</strong> {selectedTask.senderAddress}
-                        </p>
-                        <p>
-                          <strong>To:</strong> {selectedTask.receiverAddress}
-                        </p>
-                        <p>
-                          <strong>Customer:</strong> {selectedTask.customerName}
-                        </p>
-                        <p>
-                          <strong>Phone:</strong> {selectedTask.customerPhone}
-                        </p>
-                        {selectedTask.specialInstructions && (
-                          <p>
-                            <strong>Instructions:</strong> {selectedTask.specialInstructions}
-                          </p>
-                        )}
-                        <p>
-                          <strong>Warehouse:</strong> {selectedTask.warehouseId}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="alert alert-secondary">
-                      <i className="bi bi-arrow-left me-2"></i>
-                      Select a task from the left to view details
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Update Orders Tab */}
-            {activeTab === "update" && (
-              <div className="row">
-                <div className="col-md-6">
-                  <div className="card">
-                    <div className="card-header">
-                      <h5>Update Order Status</h5>
-                    </div>
-                    <div className="card-body">
-                      <form onSubmit={handleStatusUpdate}>
-                        <div className="mb-3">
-                          <label className="form-label">Order ID</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={statusUpdate.orderId}
-                            onChange={(e) => setStatusUpdate({ ...statusUpdate, orderId: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label">New Status</label>
-                          <select
-                            className="form-select"
-                            value={statusUpdate.newStatus}
-                            onChange={(e) => setStatusUpdate({ ...statusUpdate, newStatus: e.target.value })}
-                            required
-                          >
-                            <option value="">Select Status</option>
-                            <option value="PICKED_UP">Picked Up</option>
-                            <option value="IN_TRANSIT">In Transit</option>
-                            <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
-                            <option value="DELIVERED">Delivered</option>
-                          </select>
-                        </div>
-                        <button type="submit" className="btn btn-primary">
-                          Update Status
-                        </button>
-                      </form>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <div className="col-md-6">
-                  <div className="card">
-                    <div className="card-header">
-                      <h5>Update Warehouse</h5>
-                    </div>
-                    <div className="card-body">
-                      <form onSubmit={handleWarehouseUpdate}>
-                        <div className="mb-3">
-                          <label className="form-label">Order ID</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={warehouseUpdate.orderId}
-                            onChange={(e) => setWarehouseUpdate({ ...warehouseUpdate, orderId: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label">New Warehouse ID</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={warehouseUpdate.newWarehouseId}
-                            onChange={(e) => setWarehouseUpdate({ ...warehouseUpdate, newWarehouseId: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <button type="submit" className="btn btn-success">
-                          Update Warehouse
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+        {/* Action Buttons */}
+        <div className="row mb-5 justify-content-center">
+          <div className="col-lg-10">
+            <div className="d-flex gap-3 flex-wrap justify-content-center">
+              <button className="btn btn-success btn-lg" disabled={!selectedTask} onClick={handleUpdateStatus}>
+                <i className="bi bi-arrow-up-circle me-2"></i>
+                Update Status
+              </button>
+            </div>
+
+            {selectedTask && (
+              <div className="text-center mt-3">
+                <small className="text-muted">
+                  <i className="bi bi-info-circle me-1"></i>
+                  Task will remain in your list until delivered to source warehouse or final delivery
+                </small>
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
-
-export default StaffDetails
