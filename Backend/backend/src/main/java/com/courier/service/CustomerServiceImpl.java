@@ -1,14 +1,21 @@
 package com.courier.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.courier.custom_exceptions.ResourceNotFoundException;
 import com.courier.dto.CustomerDTO;
+import com.courier.dto.CustomerOrderListDTO;
+import com.courier.dto.CustomerOrderRespDTO;
+import com.courier.dto.PendingOrderDTO;
 import com.courier.entities.Customer;
 import com.courier.entities.Feedback;
+import com.courier.entities.Order;
 import com.courier.repository.CustomerRepository;
 import com.courier.repository.FeedbackRepository;
+import com.courier.repository.OrderRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -19,6 +26,8 @@ public class CustomerServiceImpl implements CustomerService {
     private FeedbackRepository feedbackRepo;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Override
     public Feedback saveFeedback(Feedback feedback) {
@@ -61,4 +70,62 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setAddress(customer.getAddress());
         return dto;
     }
+    
+    @Override
+    public CustomerOrderRespDTO getOrderDetailsById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        return new CustomerOrderRespDTO(
+            order.getOrderId(),
+            order.getTrackingId(),
+            order.getCreatedAt() != null ? order.getCreatedAt().toLocalDate().toString() : "",
+            order.getDescription(),
+            order.getSenderName(),
+            order.getSenderAddress(),
+            order.getReceiverName(),
+            order.getReceiverContact(),
+            order.getReceiverAddress(),
+            order.getWeight()
+        );
+    }
+    
+    @Override
+    public List<CustomerOrderListDTO> getOrdersByCustomerId(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomerCustomerId(customerId);
+        return orders.stream()
+                     .map(order -> new CustomerOrderListDTO(
+                    		 String.valueOf(order.getOrderId()),
+                             order.getReceiverName(),
+                             order.getStatus()))
+                     .toList();
+    }
+    
+    @Override
+    public List<PendingOrderDTO> getAllPendingOrders() {
+        List<Order> pendingOrders = orderRepository.findByStatus("Pending");
+        return pendingOrders.stream()
+                .map(order -> new PendingOrderDTO(
+                		String.valueOf(order.getOrderId()),
+                        order.getReceiverName(),
+                        order.getStatus(),
+                        order.getTrackingId()))
+                .toList();
+    }
+
+    @Override
+    public PendingOrderDTO trackOrderByTrackingId(String trackingId) {
+        Order order = orderRepository.findByTrackingId(trackingId);
+        if (order == null || !"Pending".equals(order.getStatus())) {
+            throw new RuntimeException("Pending order not found for tracking ID: " + trackingId);
+        }
+        return new PendingOrderDTO(
+                "ORD" + String.format("%03d", order.getOrderId()),
+                order.getReceiverName(),
+                order.getStatus(),
+                order.getTrackingId()
+        );
+    }
+
+
 }

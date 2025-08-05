@@ -1,291 +1,275 @@
-import { useState } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
+import { getStaffProfile } from "../services/staff"
+
 function StaffProfile() {
-    const [isEditing, setIsEditing] = useState(false)
-    const [staffData, setStaffData] = useState({
-        id: "STF001",
-        name: "Prathamesh Naraje",
-        email: "prathamesh.naraje@swiftcourier.com",
-        address: "Old TCG, Phase 2, Hinjawadi, Pune, Maharashtra 411057",
-        warehouseId: "WH001",
-        warehouseName: "Hinjawadi Distribution Center",
-    })
+  const [isEditing, setIsEditing] = useState(false)
+  const [staffData, setStaffData] = useState(null)
+  const [editData, setEditData] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [staffId] = useState(1) // You should get this from authentication/context
 
-    const [editData, setEditData] = useState({ ...staffData })
+  // Fetch staff profile from backend
+  const fetchStaffProfile = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const profile = await getStaffProfile(staffId)
 
-    const handleEdit = () => {
-        setIsEditing(true)
-        setEditData({ ...staffData })
+      if (profile) {
+        // Map backend response to frontend format
+        const mappedData = {
+          id: profile.staffId,
+          name: profile.name,
+          email: profile.email,
+          address: profile.address,
+          warehouseId: profile.warehouseId,
+          warehouseName: profile.warehouseName,
+        }
+
+        setStaffData(mappedData)
+        setEditData(mappedData)
+      } else {
+        setError("No staff profile found")
+      }
+    } catch (err) {
+      setError("Failed to fetch staff profile from database")
+      console.error("Error fetching staff profile:", err)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const handleSave = (e) => {
-        e.preventDefault()
-        setStaffData({ ...editData })
-        setIsEditing(false)
-        console.log("Updated staff data:", editData)
+  // Load profile on component mount
+  useEffect(() => {
+    fetchStaffProfile()
+  }, [])
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    setEditData({ ...staffData })
+  }
+
+  const handleSave = async (e) => {
+    e.preventDefault()
+    try {
+      // Note: You'll need to add an update profile endpoint to your backend
+      // For now, we'll just update the local state
+      setStaffData({ ...editData })
+      setIsEditing(false)
+      console.log("Updated staff data:", editData)
+      alert("Profile updated successfully! (Note: Backend update endpoint needed)")
+    } catch (err) {
+      setError("Failed to update profile")
+      console.error("Error updating profile:", err)
     }
+  }
 
-    const handleCancel = () => {
-        setIsEditing(false)
-        setEditData({ ...staffData })
-    }
+  const handleCancel = () => {
+    setIsEditing(false)
+    setEditData({ ...staffData })
+  }
 
-    const handleInputChange = (field, value) => {
-        setEditData((prev) => ({
-            ...prev,
-            [field]: value,
-        }))
-    }
+  const handleInputChange = (field, value) => {
+    setEditData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
 
-    const styles = {
-        container: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "100vh",
-            backgroundColor: "#f5f5f5",
-            fontFamily: "Arial, sans-serif",
-            padding: "20px",
-        },
-        profileCard: {
-            backgroundColor: "white",
-            padding: "40px",
-            borderRadius: "8px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            width: "100%",
-            maxWidth: "600px",
-        },
-        header: {
-            textAlign: "center",
-            marginBottom: "30px",
-            borderBottom: "2px solid #007bff",
-            paddingBottom: "20px",
-        },
-        title: {
-            color: "#333",
-            fontSize: "28px",
-            marginBottom: "5px",
-        },
-        subtitle: {
-            color: "#666",
-            fontSize: "16px",
-        },
-        fieldGroup: {
-            marginBottom: "20px",
-        },
-        label: {
-            display: "block",
-            marginBottom: "5px",
-            color: "#555",
-            fontSize: "14px",
-            fontWeight: "bold",
-        },
-        input: {
-            width: "100%",
-            padding: "12px",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-            fontSize: "16px",
-            boxSizing: "border-box",
-        },
-        textarea: {
-            width: "100%",
-            padding: "12px",
-            border: "1px solid #ddd",
-            borderRadius: "4px",
-            fontSize: "16px",
-            boxSizing: "border-box",
-            minHeight: "80px",
-            resize: "vertical",
-        },
-        displayValue: {
-            padding: "12px",
-            backgroundColor: "#f8f9fa",
-            border: "1px solid #e9ecef",
-            borderRadius: "4px",
-            fontSize: "16px",
-            color: "#333",
-        },
-        readOnlyField: {
-            backgroundColor: "#e9ecef",
-            color: "#6c757d",
-        },
-        buttonGroup: {
-            display: "flex",
-            gap: "10px",
-            marginTop: "30px",
-            justifyContent: "center",
-        },
-        button: {
-            padding: "12px 24px",
-            border: "none",
-            borderRadius: "4px",
-            fontSize: "16px",
-            cursor: "pointer",
-            minWidth: "120px",
-        },
-        editButton: {
-            backgroundColor: "#007bff",
-            color: "white",
-        },
-        saveButton: {
-            backgroundColor: "#28a745",
-            color: "white",
-        },
-        cancelButton: {
-            backgroundColor: "#6c757d",
-            color: "white",
-        },
-        row: {
-            display: "flex",
-            gap: "20px",
-            marginBottom: "20px",
-        },
-        column: {
-            flex: "1",
-        },
-    }
-
+  // Loading state
+  if (loading) {
     return (
-        <div>
-            <Navbar />
-            <div style={styles.container}>
-
-                <div style={styles.profileCard}>
-                    <div style={styles.header}>
-                        <h1 style={styles.title}>Staff Profile</h1>
-                        <p style={styles.subtitle}>SwiftCourier Staff Member Details</p>
-                    </div>
-
-                    <form onSubmit={handleSave}>
-                        <div style={styles.row}>
-                            <div style={styles.column}>
-                                <div style={styles.fieldGroup}>
-                                    <label style={styles.label} htmlFor="id">
-                                        Staff ID
-                                    </label>
-                                    <div style={{ ...styles.displayValue, ...styles.readOnlyField }}>{staffData.id}</div>
-                                </div>
-                            </div>
-                            <div style={styles.column}>
-                                <div style={styles.fieldGroup}>
-                                    <label style={styles.label} htmlFor="warehouseId">
-                                        Warehouse ID
-                                    </label>
-                                    <div style={{ ...styles.displayValue, ...styles.readOnlyField }}>{staffData.warehouseId}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.label} htmlFor="name">
-                                Full Name
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    style={styles.input}
-                                    type="text"
-                                    id="name"
-                                    value={editData.name}
-                                    onChange={(e) => handleInputChange("name", e.target.value)}
-                                    required
-                                />
-                            ) : (
-                                <div style={styles.displayValue}>{staffData.name}</div>
-                            )}
-                        </div>
-
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.label} htmlFor="email">
-                                Email Address
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    style={styles.input}
-                                    type="email"
-                                    id="email"
-                                    value={editData.email}
-                                    onChange={(e) => handleInputChange("email", e.target.value)}
-                                    required
-                                />
-                            ) : (
-                                <div style={styles.displayValue}>{staffData.email}</div>
-                            )}
-                        </div>
-
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.label} htmlFor="address">
-                                Address
-                            </label>
-                            {isEditing ? (
-                                <textarea
-                                    style={styles.textarea}
-                                    id="address"
-                                    value={editData.address}
-                                    onChange={(e) => handleInputChange("address", e.target.value)}
-                                    required
-                                />
-                            ) : (
-                                <div style={styles.displayValue}>{staffData.address}</div>
-                            )}
-                        </div>
-
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.label} htmlFor="warehouseName">
-                                Warehouse Name
-                            </label>
-                            {isEditing ? (
-                                <input
-                                    style={styles.input}
-                                    type="text"
-                                    id="warehouseName"
-                                    value={editData.warehouseName}
-                                    onChange={(e) => handleInputChange("warehouseName", e.target.value)}
-                                    required
-                                />
-                            ) : (
-                                <div style={styles.displayValue}>{staffData.warehouseName}</div>
-                            )}
-                        </div>
-
-                        <div style={styles.buttonGroup}>
-                            {isEditing ? (
-                                <>
-                                    <button
-                                        style={{ ...styles.button, ...styles.saveButton }}
-                                        type="submit"
-                                        onMouseOver={(e) => (e.target.style.backgroundColor = "#218838")}
-                                        onMouseOut={(e) => (e.target.style.backgroundColor = "#28a745")}
-                                    >
-                                        Save Changes
-                                    </button>
-                                    <button
-                                        style={{ ...styles.button, ...styles.cancelButton }}
-                                        type="button"
-                                        onClick={handleCancel}
-                                        onMouseOver={(e) => (e.target.style.backgroundColor = "#5a6268")}
-                                        onMouseOut={(e) => (e.target.style.backgroundColor = "#6c757d")}
-                                    >
-                                        Cancel
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                    style={{ ...styles.button, ...styles.editButton }}
-                                    type="button"
-                                    onClick={handleEdit}
-                                    onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
-                                    onMouseOut={(e) => (e.target.style.backgroundColor = "#007bff")}
-                                >
-                                    Edit Profile
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </div>
+      <div>
+        <Navbar />
+        <div className="container py-5">
+          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "50vh" }}>
+            <div className="text-center">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-muted">Loading staff profile...</p>
             </div>
+          </div>
         </div>
+      </div>
     )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-5">
+          <div className="card shadow mx-auto" style={{ maxWidth: "500px" }}>
+            <div className="card-body text-center">
+              <div className="alert alert-danger" role="alert">
+                <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                {error}
+              </div>
+              <button className="btn btn-primary" onClick={fetchStaffProfile}>
+                <i className="bi bi-arrow-clockwise me-2"></i>
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!staffData) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-5">
+          <div className="card shadow mx-auto" style={{ maxWidth: "500px" }}>
+            <div className="card-body text-center">
+              <div className="alert alert-warning" role="alert">
+                <i className="bi bi-person-x-fill me-2"></i>
+                No staff profile found in database
+              </div>
+              <button className="btn btn-primary" onClick={fetchStaffProfile}>
+                <i className="bi bi-arrow-clockwise me-2"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Main profile display
+  return (
+    <div>
+      <Navbar />
+      <div className="container py-5">
+        <div className="card shadow mx-auto" style={{ maxWidth: "700px" }}>
+          <div className="card-body">
+            <div className="text-center mb-4 border-bottom pb-3">
+              <h2 className="card-title">Staff Profile</h2>
+              <p className="text-muted">SwiftCourier Staff Member Details</p>
+            </div>
+
+            <form onSubmit={handleSave}>
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <label className="form-label">Staff ID</label>
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.id}</div>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label">Warehouse ID</label>
+                  <div className="form-control-plaintext bg-light rounded p-2">
+                    {staffData.warehouseId || "Not Assigned"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">
+                  Full Name
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    id="name"
+                    className="form-control"
+                    value={editData.name || ""}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    required
+                  />
+                ) : (
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.name}</div>
+                )}
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">
+                  Email Address
+                </label>
+                {isEditing ? (
+                  <input
+                    type="email"
+                    id="email"
+                    className="form-control"
+                    value={editData.email || ""}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    required
+                  />
+                ) : (
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.email}</div>
+                )}
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="address" className="form-label">
+                  Address
+                </label>
+                {isEditing ? (
+                  <textarea
+                    id="address"
+                    className="form-control"
+                    rows="3"
+                    value={editData.address || ""}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    required
+                  />
+                ) : (
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.address}</div>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="warehouseName" className="form-label">
+                  Warehouse Name
+                </label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    id="warehouseName"
+                    className="form-control"
+                    value={editData.warehouseName || ""}
+                    onChange={(e) => handleInputChange("warehouseName", e.target.value)}
+                    required
+                  />
+                ) : (
+                  <div className="form-control-plaintext bg-light rounded p-2">
+                    {staffData.warehouseName || "Not Assigned"}
+                  </div>
+                )}
+              </div>
+
+              <div className="d-flex justify-content-center gap-3">
+                {isEditing ? (
+                  <>
+                    <button type="submit" className="btn btn-success">
+                      <i className="bi bi-check-lg me-2"></i>
+                      Save Changes
+                    </button>
+                    <button type="button" className="btn btn-secondary" onClick={handleCancel}>
+                      <i className="bi bi-x-lg me-2"></i>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="btn btn-primary" onClick={handleEdit}>
+                    <i className="bi bi-pencil-square me-2"></i>
+                    Edit Profile
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default StaffProfile
