@@ -2,6 +2,7 @@ package com.courier.service;
 
 import java.util.List;
 
+import com.courier.dto.ManageStaffAdminDTO;
 import com.courier.dto.OrderAdminRespDTO;
 import com.courier.entities.Admin;
 
@@ -13,4 +14,5 @@ public interface AdminService {
 
 	List<OrderAdminRespDTO> getOrdersForDashboard();
 
+	List<ManageStaffAdminDTO> getStaffByAdminWarehouse(Long adminId);
 }

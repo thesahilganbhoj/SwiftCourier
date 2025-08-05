@@ -28,6 +28,10 @@ public class Admin {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @OneToOne
+    @JoinColumn(name = "warehouse_id", referencedColumnName = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+    
     // Custom constructor without ID (for creating new Admins)
     public Admin(String name, String email, String password) {
         this.name = name;

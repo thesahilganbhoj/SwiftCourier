@@ -13,5 +13,7 @@ public class OrderAdminRespDTO {
 
 	private Long orderId;
     private Long customerId;
+    private String senderAddress;   
+    private String receiverAddress; 
     private String city;
 }
