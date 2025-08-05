@@ -1,6 +1,8 @@
 package com.courier.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -127,5 +129,13 @@ public class CustomerServiceImpl implements CustomerService {
         );
     }
 
+    @Override
+    public Order addOrder(Order order) {
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setTrackingId(UUID.randomUUID().toString().substring(0, 10).toUpperCase());
+        order.setStatus("Pending");
+        return orderRepository.save(order);
+    }
 
 }
