@@ -45,3 +45,15 @@ export const trackOrderByTrackingId = async (trackingId) => {
     throw err;
   }
 };
+
+
+// 🔸 Add new order
+export const addOrder = async (orderData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/orders/add`, orderData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add order:", error);
+    throw error;
+  }
+};
