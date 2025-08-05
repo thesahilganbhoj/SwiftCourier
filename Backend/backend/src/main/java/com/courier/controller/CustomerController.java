@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.courier.entities.Feedback;
+import com.courier.entities.Order;
 import com.courier.dto.ApiResponse;
 import com.courier.dto.CustomerDTO;
 import com.courier.dto.CustomerOrderListDTO;
@@ -72,6 +73,13 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.trackOrderByTrackingId(trackingId));
     }
 
+    
+    @PostMapping("/orders/add")
+    public ResponseEntity<?> addOrder(@RequestBody Order order) {
+        Order savedOrder = customerService.addOrder(order);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("Order placed successfully", savedOrder));
+    }
 
 
 }
