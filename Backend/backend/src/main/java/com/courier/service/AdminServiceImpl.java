@@ -1,10 +1,12 @@
 package com.courier.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.courier.dto.OrderAdminRespDTO;
 import com.courier.entities.Admin;
 import com.courier.repository.AdminRepository;
 
@@ -31,6 +33,10 @@ public class AdminServiceImpl implements AdminService{
 		 return "Admin added successfully!!!!!!!!!!!";
 	}
 	
-	
+	@Override
+	public List<OrderAdminRespDTO> getOrdersForDashboard()
+	{
+		return null;
+	}
 	
 }
