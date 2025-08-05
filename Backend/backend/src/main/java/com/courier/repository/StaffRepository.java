@@ -1,8 +1,13 @@
 package com.courier.repository;
 
-import com.courier.entities.Staff;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface StaffRepository extends JpaRepository<Staff, Long> {
+import com.courier.entities.Staff;
 
+public interface StaffRepository extends JpaRepository<Staff, Long> {
+	  boolean existsById(Long staffId); 
+	  Optional<Staff> findByEmail(String email);
+	    boolean existsByEmail(String email);
 }

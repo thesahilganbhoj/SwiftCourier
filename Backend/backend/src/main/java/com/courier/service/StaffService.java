@@ -1,6 +1,10 @@
 package com.courier.service;
 
 import com.courier.dto.*;
+import com.courier.entities.Staff;
+
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 public interface StaffService {
@@ -16,4 +20,7 @@ public interface StaffService {
     // New methods for availability management
     StaffAvailabilityResponseDTO getStaffAvailability(Long staffId);
     void updateStaffAvailability(StaffAvailabilityUpdateRequestDTO dto);
+    public void deleteStaffById(Long staffId);
+	
+    Staff createStaff(@Valid StaffRequestDTO staffRequest);
 }

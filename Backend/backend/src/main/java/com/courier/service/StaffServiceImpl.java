@@ -1,16 +1,37 @@
 package com.courier.service;
 
-import com.courier.dto.*;
-import com.courier.entities.*;
-import com.courier.repository.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.courier.custom_exceptions.InvalidRequestException;
+import com.courier.custom_exceptions.ResourceNotFoundException;
+import com.courier.dto.StaffAcceptOrderRequestDTO;
+import com.courier.dto.StaffAvailabilityResponseDTO;
+import com.courier.dto.StaffAvailabilityUpdateRequestDTO;
+import com.courier.dto.StaffOrderResponseDTO;
+import com.courier.dto.StaffProfileResponseDTO;
+import com.courier.dto.StaffProfileUpdateRequestDTO;
+import com.courier.dto.StaffRequestDTO;
+import com.courier.dto.StaffUpdateStatusRequestDTO;
+import com.courier.dto.StaffUpdateWarehouseRequestDTO;
+import com.courier.entities.Order;
+import com.courier.entities.Staff;
+import com.courier.entities.StaffAvailability;
+import com.courier.entities.Warehouse;
+import com.courier.repository.OrderRepository;
+import com.courier.repository.RouteTrackingRepository;
+import com.courier.repository.StaffAvailabilityRepository;
+import com.courier.repository.StaffRepository;
+import com.courier.repository.WarehouseRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -21,6 +42,8 @@ public class StaffServiceImpl implements StaffService{
     private final RouteTrackingRepository routeTrackingRepository;
     private final StaffRepository staffRepository;
     private final StaffAvailabilityRepository staffAvailabilityRepository;
+    @Autowired
+    private WarehouseRepository warehouseRepository;
 
     @Override
     public void acceptOrder(StaffAcceptOrderRequestDTO dto) {
@@ -119,7 +142,9 @@ public class StaffServiceImpl implements StaffService{
             staff.getName(),
             staff.getEmail(),
             staff.getAddress(),
-            warehouse != null ? warehouse.getName() : null
+           
+            warehouse != null ? warehouse.getName() : null,
+            		 staff.getContactNumber()
         );
     }
 
@@ -243,4 +268,45 @@ public class StaffServiceImpl implements StaffService{
                 order.getPrice()
         );
     }
+    
+    public void deleteStaffById(Long staffId) {
+        if (staffId == null || staffId <= 0) {
+            throw new InvalidRequestException("Invalid staff ID provided: " + staffId);
+        }
+
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff with ID " + staffId + " not found"));
+
+        if (staff.getAssignedOrders() != null && !staff.getAssignedOrders().isEmpty()) {
+            throw new InvalidRequestException("Cannot delete staff ID " + staffId + " as they are assigned to active orders.");
+        }
+
+        StaffAvailability availability = staff.getStaffAvailability();
+        if (availability != null) {
+            availability.setStaff(null); // Break bidirectional link
+            staff.setStaffAvailability(null); 
+        }
+
+        staffRepository.delete(staff);
+    }
+    public Staff createStaff(StaffRequestDTO dto) {
+        if (staffRepository.existsByEmail(dto.getEmail())) {
+            throw new InvalidRequestException("Email already exists: " + dto.getEmail());
+        }
+
+         Warehouse warehouse = warehouseRepository.findById(dto.getWarehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with ID: " + dto.getWarehouseId()));
+
+        Staff staff = new Staff();
+        staff.setName(dto.getName());
+        staff.setEmail(dto.getEmail());
+        staff.setPassword(dto.getPassword());
+        staff.setAddress(dto.getAddress());
+        staff.setContactNumber(dto.getContactNumber());
+        staff.setCurrentWarehouse(warehouse);
+        staff.setCity(dto.getCity());
+
+        return staffRepository.save(staff);
+    }
+    
 }

@@ -1,13 +1,36 @@
 package com.courier.controller;
 
-import com.courier.dto.*;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.courier.dto.ApiResponse;
+import com.courier.dto.StaffAcceptOrderRequestDTO;
+import com.courier.dto.StaffAvailabilityResponseDTO;
+import com.courier.dto.StaffAvailabilityUpdateRequestDTO;
+import com.courier.dto.StaffOrderResponseDTO;
+import com.courier.dto.StaffProfileResponseDTO;
+import com.courier.dto.StaffProfileUpdateRequestDTO;
+import com.courier.dto.StaffRequestDTO;
+import com.courier.dto.StaffUpdateStatusRequestDTO;
+import com.courier.dto.StaffUpdateWarehouseRequestDTO;
+import com.courier.entities.Staff;
 import com.courier.service.StaffService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -131,5 +154,17 @@ public class StaffController {
             log.error("Error updating staff availability: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(new ApiResponse<>("Failed to update availability: " + e.getMessage(), null));
         }
+    }
+    
+    
+    @DeleteMapping("/{staffId}")
+    public ResponseEntity<String> deleteStaff(@PathVariable Long staffId) {
+        staffService.deleteStaffById(staffId);
+        return ResponseEntity.ok("✅ Staff with ID " + staffId + " has been deleted successfully.");
+    }
+    @PostMapping("/createStaff")
+    public ResponseEntity<?> createStaff(@Valid @RequestBody StaffRequestDTO staffRequest) {
+        Staff createdStaff = staffService.createStaff(staffRequest);
+        return ResponseEntity.ok("✅ Staff created successfully with ID: " + createdStaff.getStaffId());
     }
 }

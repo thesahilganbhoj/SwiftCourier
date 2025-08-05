@@ -12,4 +12,5 @@ public class StaffProfileResponseDTO {
     private String email;
     private String address;
     private String warehouseName;
+    private String contactNumber;
 }
