@@ -1,6 +1,5 @@
 package com.courier.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -56,6 +55,33 @@ public class WarehouseServiceImpl implements WarehouseService {
     	                w.getAddress(), w.getContactNumber()))
     	            .toList();
 
+    }
+    
+    public String updateWarehouse(Long warehouseId, WarehouseDTO warehouseDTO) {
+        // Validate input DTO
+        if (warehouseDTO == null) {
+            throw new IllegalArgumentException("Warehouse details cannot be null");
+        }
+
+        // Fetch existing warehouse or throw exception
+        Warehouse existingWarehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with ID: " + warehouseId));
+
+        existingWarehouse.setWarehouseId(warehouseId);
+        modelMapper.map(warehouseDTO, existingWarehouse);
+       
+            warehouseRepository.save(existingWarehouse);
+            return "Warehouse updated successfully!";
+      }
+    public String deleteWarehouse(Long warehouseId) {
+        // Check if warehouse exists
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with ID: " + warehouseId));
+
+       
+            warehouseRepository.delete(warehouse);
+            return "Warehouse deleted successfully!";
+       
     }
 
 }

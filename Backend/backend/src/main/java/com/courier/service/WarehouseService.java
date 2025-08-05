@@ -16,5 +16,9 @@ public interface WarehouseService {
 	WarehouseDTO getWarehouseById(Long warehouseId);
 
 	List<WarehouseDTO> getAllWarehouses();
+	
+	public String updateWarehouse(Long warehouseId, WarehouseDTO warehouseDTO);
+	
+	public String deleteWarehouse(Long warehouseId);
 
 }
