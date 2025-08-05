@@ -1,16 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import Navbar from "../components/Navbar"
-import { getStaffProfile } from "../services/staff"
+import { getStaffProfile, updateStaffProfile } from "../services/staff"
 
 function StaffProfile() {
   const [isEditing, setIsEditing] = useState(false)
   const [staffData, setStaffData] = useState(null)
   const [editData, setEditData] = useState({})
+  const [originalData, setOriginalData] = useState({})
   const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
   const [error, setError] = useState(null)
-  const [staffId] = useState(1) // You should get this from authentication/context
+
+  const { staffId: paramStaffId } = useParams()
+
+  // Get staff ID from URL params or default to 1 for testing
+  const staffId = paramStaffId ? Number.parseInt(paramStaffId) : 1
 
   // Fetch staff profile from backend
   const fetchStaffProfile = async () => {
@@ -32,11 +39,12 @@ function StaffProfile() {
 
         setStaffData(mappedData)
         setEditData(mappedData)
+        setOriginalData(mappedData)
       } else {
         setError("No staff profile found")
       }
     } catch (err) {
-      setError("Failed to fetch staff profile from database")
+      setError(`Failed to fetch staff profile for ID: ${staffId}`)
       console.error("Error fetching staff profile:", err)
     } finally {
       setLoading(false)
@@ -46,31 +54,47 @@ function StaffProfile() {
   // Load profile on component mount
   useEffect(() => {
     fetchStaffProfile()
-  }, [])
+  }, [staffId])
 
   const handleEdit = () => {
     setIsEditing(true)
-    setEditData({ ...staffData })
+    setEditData({ ...staffData }) // Reset edit data to current staff data
   }
 
   const handleSave = async (e) => {
     e.preventDefault()
     try {
-      // Note: You'll need to add an update profile endpoint to your backend
-      // For now, we'll just update the local state
+      setUpdating(true)
+      setError(null)
+
+      // Prepare data for backend
+      const updateData = {
+        name: editData.name,
+        email: editData.email,
+        address: editData.address,
+        warehouseName: editData.warehouseName,
+      }
+
+      const response = await updateStaffProfile(staffId, updateData)
+
+      // Update local state with the saved data
       setStaffData({ ...editData })
+      setOriginalData({ ...editData })
       setIsEditing(false)
-      console.log("Updated staff data:", editData)
-      alert("Profile updated successfully! (Note: Backend update endpoint needed)")
+
+      alert("Profile updated successfully!")
     } catch (err) {
       setError("Failed to update profile")
       console.error("Error updating profile:", err)
+      alert("Failed to update profile. Please try again.")
+    } finally {
+      setUpdating(false)
     }
   }
 
   const handleCancel = () => {
     setIsEditing(false)
-    setEditData({ ...staffData })
+    setEditData({ ...originalData }) // Reset to original data, discarding changes
   }
 
   const handleInputChange = (field, value) => {
@@ -78,6 +102,11 @@ function StaffProfile() {
       ...prev,
       [field]: value,
     }))
+  }
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = () => {
+    return JSON.stringify(editData) !== JSON.stringify(originalData)
   }
 
   // Loading state
@@ -91,7 +120,7 @@ function StaffProfile() {
               <div className="spinner-border text-primary mb-3" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
-              <p className="text-muted">Loading staff profile...</p>
+              <p className="text-muted">Loading staff profile for ID: {staffId}...</p>
             </div>
           </div>
         </div>
@@ -132,7 +161,7 @@ function StaffProfile() {
             <div className="card-body text-center">
               <div className="alert alert-warning" role="alert">
                 <i className="bi bi-person-x-fill me-2"></i>
-                No staff profile found in database
+                No staff profile found for ID: {staffId}
               </div>
               <button className="btn btn-primary" onClick={fetchStaffProfile}>
                 <i className="bi bi-arrow-clockwise me-2"></i>
@@ -157,25 +186,36 @@ function StaffProfile() {
               <p className="text-muted">SwiftCourier Staff Member Details</p>
             </div>
 
-            <form onSubmit={handleSave}>
-              <div className="row mb-3">
-                <div className="col-md-6">
-                  <label className="form-label">Staff ID</label>
-                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.id}</div>
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Warehouse ID</label>
-                  <div className="form-control-plaintext bg-light rounded p-2">
-                    {staffData.warehouseId || "Not Assigned"}
-                  </div>
+            {/* Unsaved Changes Warning */}
+            {isEditing && hasUnsavedChanges() && (
+              <div className="alert alert-warning" role="alert">
+                <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                You have unsaved changes. Make sure to save or cancel your changes.
+              </div>
+            )}
+
+            {/* Staff ID and Warehouse ID - Always visible */}
+            <div className="row mb-3">
+              <div className="col-md-6">
+                <label className="form-label">Staff ID</label>
+                <div className="form-control-plaintext bg-light rounded p-2">{staffData.id}</div>
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Warehouse ID</label>
+                <div className="form-control-plaintext bg-light rounded p-2">
+                  {staffData.warehouseId || "Not Assigned"}
                 </div>
               </div>
+            </div>
 
-              <div className="mb-3">
-                <label htmlFor="name" className="form-label">
-                  Full Name
-                </label>
-                {isEditing ? (
+            {/* Conditional rendering based on edit mode */}
+            {isEditing ? (
+              // Edit Mode - Form with editable fields
+              <form onSubmit={handleSave}>
+                <div className="mb-3">
+                  <label htmlFor="name" className="form-label">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     id="name"
@@ -184,16 +224,12 @@ function StaffProfile() {
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     required
                   />
-                ) : (
-                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.name}</div>
-                )}
-              </div>
+                </div>
 
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">
-                  Email Address
-                </label>
-                {isEditing ? (
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -202,16 +238,12 @@ function StaffProfile() {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
                   />
-                ) : (
-                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.email}</div>
-                )}
-              </div>
+                </div>
 
-              <div className="mb-3">
-                <label htmlFor="address" className="form-label">
-                  Address
-                </label>
-                {isEditing ? (
+                <div className="mb-3">
+                  <label htmlFor="address" className="form-label">
+                    Address
+                  </label>
                   <textarea
                     id="address"
                     className="form-control"
@@ -220,16 +252,12 @@ function StaffProfile() {
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     required
                   />
-                ) : (
-                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.address}</div>
-                )}
-              </div>
+                </div>
 
-              <div className="mb-4">
-                <label htmlFor="warehouseName" className="form-label">
-                  Warehouse Name
-                </label>
-                {isEditing ? (
+                <div className="mb-4">
+                  <label htmlFor="warehouseName" className="form-label">
+                    Warehouse Name
+                  </label>
                   <input
                     type="text"
                     id="warehouseName"
@@ -238,33 +266,52 @@ function StaffProfile() {
                     onChange={(e) => handleInputChange("warehouseName", e.target.value)}
                     required
                   />
-                ) : (
+                </div>
+
+                <div className="d-flex justify-content-center gap-3">
+                  <button type="submit" className="btn btn-success" disabled={updating}>
+                    <i className="bi bi-check-lg me-2"></i>
+                    {updating ? "Updating..." : "Update Profile"}
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={updating}>
+                    <i className="bi bi-x-lg me-2"></i>
+                    Cancel Changes
+                  </button>
+                </div>
+              </form>
+            ) : (
+              // View Mode - Display only fields
+              <div>
+                <div className="mb-3">
+                  <label className="form-label">Full Name</label>
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.name}</div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Email Address</label>
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.email}</div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Address</label>
+                  <div className="form-control-plaintext bg-light rounded p-2">{staffData.address}</div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="form-label">Warehouse Name</label>
                   <div className="form-control-plaintext bg-light rounded p-2">
                     {staffData.warehouseName || "Not Assigned"}
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="d-flex justify-content-center gap-3">
-                {isEditing ? (
-                  <>
-                    <button type="submit" className="btn btn-success">
-                      <i className="bi bi-check-lg me-2"></i>
-                      Save Changes
-                    </button>
-                    <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                      <i className="bi bi-x-lg me-2"></i>
-                      Cancel
-                    </button>
-                  </>
-                ) : (
+                <div className="d-flex justify-content-center">
                   <button type="button" className="btn btn-primary" onClick={handleEdit}>
                     <i className="bi bi-pencil-square me-2"></i>
                     Edit Profile
                   </button>
-                )}
+                </div>
               </div>
-            </form>
+            )}
           </div>
         </div>
       </div>

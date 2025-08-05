@@ -1,11 +1,11 @@
 import axios from "axios"
 
-const BASE_URL = "http://localhost:8080/api/staff"
+const BASE_URL = "http://localhost:8080"
 
 // Get pending orders that staff can accept
 export const getPendingOrders = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/pending-orders`)
+    const response = await axios.get(`${BASE_URL}/orders/pending`)
     return response.data
   } catch (error) {
     console.error("Failed to fetch pending orders:", error)
@@ -13,10 +13,10 @@ export const getPendingOrders = async () => {
   }
 }
 
-// Accept an order
-export const acceptOrder = async (orderData) => {
+// Accept a pending order
+export const acceptPendingOrder = async (orderData) => {
   try {
-    const response = await axios.post(`${BASE_URL}/accept-order`, orderData)
+    const response = await axios.post(`${BASE_URL}/staff/accept-order`, orderData)
     return response.data
   } catch (error) {
     console.error("Failed to accept order:", error)
@@ -24,24 +24,13 @@ export const acceptOrder = async (orderData) => {
   }
 }
 
-// Get order details by order ID
-export const getOrderDetails = async (orderId) => {
+// Get staff tasks
+export const getStaffTasks = async (staffId) => {
   try {
-    const response = await axios.get(`${BASE_URL}/order/${orderId}`)
+    const response = await axios.get(`${BASE_URL}/staff/tasks?staffId=${staffId}`)
     return response.data
   } catch (error) {
-    console.error("Failed to fetch order details:", error)
-    throw error
-  }
-}
-
-// Get accepted tasks for a staff member
-export const getAcceptedTasks = async (staffId) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/tasks?staffId=${staffId}`)
-    return response.data
-  } catch (error) {
-    console.error("Failed to fetch accepted tasks:", error)
+    console.error("Failed to fetch staff tasks:", error)
     throw error
   }
 }
@@ -49,7 +38,7 @@ export const getAcceptedTasks = async (staffId) => {
 // Update order status
 export const updateOrderStatus = async (statusData) => {
   try {
-    const response = await axios.patch(`${BASE_URL}/update-status`, statusData)
+    const response = await axios.patch(`${BASE_URL}/staff/update-status`, statusData)
     return response.data
   } catch (error) {
     console.error("Failed to update order status:", error)
@@ -57,10 +46,10 @@ export const updateOrderStatus = async (statusData) => {
   }
 }
 
-// Update warehouse for an order
-export const updateWarehouse = async (warehouseData) => {
+// Update warehouse
+export const updateOrderWarehouse = async (warehouseData) => {
   try {
-    const response = await axios.patch(`${BASE_URL}/update-warehouse`, warehouseData)
+    const response = await axios.patch(`${BASE_URL}/staff/update-warehouse`, warehouseData)
     return response.data
   } catch (error) {
     console.error("Failed to update warehouse:", error)
