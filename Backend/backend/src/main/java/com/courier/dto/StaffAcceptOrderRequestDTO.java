@@ -1,6 +1,8 @@
 package com.courier.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // Accept Order Request DTO
 @Data

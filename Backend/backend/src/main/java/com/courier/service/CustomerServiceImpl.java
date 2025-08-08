@@ -134,7 +134,7 @@ public class CustomerServiceImpl implements CustomerService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         order.setTrackingId(UUID.randomUUID().toString().substring(0, 10).toUpperCase());
-        order.setStatus("Pending");
+        order.setStatus("Placed");
         return orderRepository.save(order);
     }
 
