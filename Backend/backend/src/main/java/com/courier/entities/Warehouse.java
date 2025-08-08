@@ -32,6 +32,9 @@ public class Warehouse {
     
     @OneToMany(mappedBy = "currentWarehouse")  // Back-reference
     private List<Staff> staffList;
+    
+    @OneToOne(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Admin admin;
 
     // Custom constructor (without ID)
     public Warehouse(String city, String address, String contactNumber) {

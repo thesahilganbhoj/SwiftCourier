@@ -178,6 +178,7 @@ public class StaffServiceImpl implements StaffService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public StaffAvailabilityResponseDTO getStaffAvailability(Long staffId) {
         log.info("Fetching availability for staff ID: {}", staffId);
         
@@ -201,17 +202,18 @@ public class StaffServiceImpl implements StaffService{
 
         log.info("Staff {} availability: {}", staffId, availability.isAvailable());
         return new StaffAvailabilityResponseDTO(
-            availability.getStaffId(),
-            availability.getCurrentLocation(),
-            availability.isAvailable(),
-            availability.getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        );
+        	    availability.getStaffId(),
+        	    availability.getCurrentLocation(),
+        	    availability.isAvailable(),
+        	    availability.getLastUpdated() // ✅ no formatting
+        	);
+
     }
 
     @Override
     @Transactional
     public void updateStaffAvailability(StaffAvailabilityUpdateRequestDTO dto) {
-        log.info("Updating availability for staff {} to {}", dto.getStaffId(), dto.isAvailable());
+        log.info("Received availability update request for staff {}. New status: {}", dto.getStaffId(), dto.isAvailable());
         
         try {
             // First check if staff exists
