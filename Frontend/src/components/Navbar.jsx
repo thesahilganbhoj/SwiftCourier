@@ -3,26 +3,22 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../App'
 
 function Navbar() {
-    // get the logged in user info
     const { user, setUser } = useContext(AuthContext)
-    // get the navigate function reference
     const navigate = useNavigate()
 
-    // Helper to check if user has a specific role
     const hasRole = (roleToCheck) => {
         return user && user.role?.toUpperCase() === roleToCheck.toUpperCase();
     };
 
-    // Determine the brand link based on user role
     const getBrandLink = () => {
         if (!user) {
-            return '/'; // If not logged in, go to public homepage
+            return '/';
         }
         switch (user.role?.toUpperCase()) {
             case 'ADMIN':
                 return '/admin/dashboard';
             case 'CUSTOMER':
-                return '/customer/homepage'; // Or just '/' if it's the same public page
+                return '/customer/homepage';
             case 'STAFF':
                 return `/staff/staff-details/${user.userId}`;
             default:
@@ -30,14 +26,10 @@ function Navbar() {
         }
     };
 
-    // Logout function
     const handleLogout = () => {
-        // Clear user data
         setUser(null)
-        // Clear any stored authentication data (if using localStorage/sessionStorage)
         localStorage.removeItem('user')
-        localStorage.removeItem('token') // Assuming you might store a token
-        // Redirect to login page
+        localStorage.removeItem('token')
         navigate('/login')
     }
 
@@ -47,10 +39,7 @@ function Navbar() {
             data-bs-theme='dark'
         >
             <div className='container-fluid'>
-                <Link
-                    className='navbar-brand'
-                    to={getBrandLink()}
-                >
+                <Link className='navbar-brand' to={getBrandLink()}>
                     SwiftCourier
                 </Link>
                 <button
@@ -64,126 +53,98 @@ function Navbar() {
                 >
                     <span className='navbar-toggler-icon'></span>
                 </button>
-                <div
-                    className='collapse navbar-collapse'
-                    id='navbarNavDropdown'
-                >
+                <div className='collapse navbar-collapse' id='navbarNavDropdown'>
                     <ul className='navbar-nav me-auto mb-2 mb-lg-0'>
-                        {/* Admin Dropdown */}
+                        {/* Public/Customer Home Link (always visible if customer or not logged in) */}
+                        {!user || hasRole('CUSTOMER') ? (
+                            <li className='nav-item'>
+                                <Link className='nav-link' to='/customer/homepage'>
+                                    Home
+                                </Link>
+                            </li>
+                        ) : null}
+
+                        {/* Admin Navigation */}
                         {hasRole('ADMIN') && (
-                            <li className='nav-item dropdown'>
-                                <a
-                                    className='nav-link dropdown-toggle'
-                                    href='#'
-                                    role='button'
-                                    data-bs-toggle='dropdown'
-                                    aria-expanded='false'
-                                >
-                                    Admin
-                                </a>
-                                <ul className='dropdown-menu'>
-                                    <li>
-                                        <Link className='dropdown-item' to='/admin/dashboard'>
-                                            Dashboard
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/admin/manage-staff'>
-                                            Manage Staff
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/admin/add-staff'>
-                                            Add Staff
-                                        </Link>
-                                    </li>
-                                    <li><hr className='dropdown-divider' /></li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/admin/manage-hub'>
-                                            Manage Hub
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/admin/order-history'>
-                                            Order History
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </li>
+                            <>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/admin/dashboard'>
+                                        Dashboard
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/admin/manage-staff'>
+                                        Manage Staff
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/admin/add-staff'>
+                                        Add Staff
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/admin/manage-hub'>
+                                        Manage Hub
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/admin/order-history'>
+                                        Order History
+                                    </Link>
+                                </li>
+                            </>
                         )}
 
-                        {/* Staff Dropdown */}
+                        {/* Staff Navigation */}
                         {hasRole('STAFF') && (
-                            <li className='nav-item dropdown'>
-                                <a
-                                    className='nav-link dropdown-toggle'
-                                    href='#'
-                                    role='button'
-                                    data-bs-toggle='dropdown'
-                                    aria-expanded='false'
-                                >
-                                    Staff
-                                </a>
-                                <ul className='dropdown-menu'>
-                                    <li>
-                                        <Link className='dropdown-item' to={`/staff/staff-details/${user.userId}`}>
-                                            Staff Details
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to={`/staff/profile/${user.userId}`}>
-                                            Staff Profile
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </li>
+                            <>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to={`/staff/staff-details/${user.userId}`}>
+                                        Staff Dashboard
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to={`/staff/profile/${user.userId}`}>
+                                        Staff Profile
+                                    </Link>
+                                </li>
+                            </>
                         )}
 
-                        {/* Customer Dropdown */}
+                        {/* Customer Navigation (additional links) */}
                         {hasRole('CUSTOMER') && (
-                            <li className='nav-item dropdown'>
-                                <a
-                                    className='nav-link dropdown-toggle'
-                                    href='#'
-                                    role='button'
-                                    data-bs-toggle='dropdown'
-                                    aria-expanded='false'
-                                >
-                                    Customer
-                                </a>
-                                <ul className='dropdown-menu'>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/homepage'>
-                                            Home Page
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/add-courier'>
-                                            Add Order
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/profile'>
-                                            Customer Profile
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/order-details'>
-                                            Order Details
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/track-courier'>
-                                            Track Order
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link className='dropdown-item' to='/customer/feedback'>
-                                            Feedback
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </li>
+                            <>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/add-courier'>
+                                        Add Order
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/profile'>
+                                        Profile
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/order-details'>
+                                        Order Details
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/track-courier'>
+                                        Track Order
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/order-history'>
+                                        Order History
+                                    </Link>
+                                </li>
+                                <li className='nav-item'>
+                                    <Link className='nav-link' to='/customer/feedback'>
+                                        Feedback
+                                    </Link>
+                                </li>
+                            </>
                         )}
                     </ul>
 
