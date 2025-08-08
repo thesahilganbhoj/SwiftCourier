@@ -1,5 +1,5 @@
 import { useState } from "react"
-import Navbar from "../components/Navbar"
+// import Navbar from "../components/Navbar"
 import { registerCustomer } from "../services/auth"
 
 function Register() {
@@ -82,7 +82,7 @@ function Register() {
 
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <div style={styles.container}>
         <div style={styles.form}>
           <h2 style={styles.title}>SwiftCourier Register (Customer)</h2>

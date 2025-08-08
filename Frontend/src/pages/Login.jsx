@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react"
 import { AuthContext } from "../App"
-import Navbar from "../components/Navbar"
+// import Navbar from "../components/Navbar"
 import { login } from "../services/auth"
 
 function Login() {
@@ -117,7 +117,7 @@ function Login() {
 
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <div style={styles.container}>
         <div style={styles.form}>
           <h2 style={styles.title}>SwiftCourier Login</h2>
@@ -170,11 +170,11 @@ function Login() {
             </button>
           </form>
 
-          <div style={styles.link}>
+          {/* <div style={styles.link}>
             <a href="#" style={styles.linkText} onClick={(e) => e.preventDefault()}>
               Forgot Password?
             </a>
-          </div>
+          </div> */}
 
           <div style={styles.divider}>Don't have an account?</div>
 
