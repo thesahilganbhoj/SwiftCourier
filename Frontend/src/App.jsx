@@ -22,42 +22,51 @@ import DeleteStaff from "./pages/DeleteStaff"
 import FeedbackForm from "./pages/Feedback"
 import ManageStaff from "./pages/ManageStaff"
 import UpdateOrderStatus from "./pages/UpdateOrderStatus"
+import ProtectedRoute from "./components/ProtectedRoute" // Import the new component
 
 export const AuthContext = createContext()
 
 function App() {
-  const [user, setUser] = useState(null)
+  // Initialize user from localStorage on app load
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
   return (
     <div>
       <AuthContext.Provider value={{ user, setUser }}>
         <Routes>
+          {/* Public Routes - Accessible to everyone */}
+          <Route path="/" element={<HomePage />} /> {/* Main landing/home page */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/order-history" element={<OrderHistoryAdmin />} />
-          <Route path="/admin/manage-hub" element={<ManageHub />} />
-          <Route path="/admin/add-staff" element={<AddStaff />} />
-          <Route path="/admin/manage-staff" element={<ManageStaff />} />
-          <Route path="/admin/delete-staff/:staffId" element={<DeleteStaff />} />
-
-          <Route path="/customer/add-courier" element={<AddCourier />} />
+          {/* If /customer/homepage is the same as /, make it public too */}
           <Route path="/customer/homepage" element={<HomePage />} />
-          <Route path="/customer/track-courier" element={<TrackCourier />} />
-          <Route path="/customer/order-details" element={<OrderDetails />} />
-          <Route path="/customer/order-history" element={<OrderHistory />} />
-          <Route path="/customer/profile" element={<CustomerProfile />} />
-          <Route path="/customer/feedback" element={<FeedbackForm />} />
 
-          {/* Staff Routes with Dynamic Staff ID */}
-          <Route path="/staff/profile" element={<StaffProfile />} />
-          <Route path="/staff/profile/:staffId" element={<StaffProfile />} />
-          <Route path="/staff/staff-details" element={<StaffDetails />} />
-          <Route path="/staff/staff-details/:staffId" element={<StaffDetails />} />
-          <Route path="/staff/update-status/:staffId/:orderId" element={<UpdateOrderStatus />} />
 
-          <Route path="/" element={<HomePage />} />
+          {/* Admin Routes - Protected */}
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/order-history" element={<ProtectedRoute allowedRoles={['ADMIN']}><OrderHistoryAdmin /></ProtectedRoute>} />
+          <Route path="/admin/manage-hub" element={<ProtectedRoute allowedRoles={['ADMIN']}><ManageHub /></ProtectedRoute>} />
+          <Route path="/admin/add-staff" element={<ProtectedRoute allowedRoles={['ADMIN']}><AddStaff /></ProtectedRoute>} />
+          <Route path="/admin/manage-staff" element={<ProtectedRoute allowedRoles={['ADMIN']}><ManageStaff /></ProtectedRoute>} />
+          <Route path="/admin/delete-staff/:staffId" element={<ProtectedRoute allowedRoles={['ADMIN']}><DeleteStaff /></ProtectedRoute>} />
+
+          {/* Customer Routes - Protected (except homepage) */}
+          <Route path="/customer/add-courier" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><AddCourier /></ProtectedRoute>} />
+          <Route path="/customer/track-courier" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><TrackCourier /></ProtectedRoute>} />
+          <Route path="/customer/order-details" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><OrderDetails /></ProtectedRoute>} />
+          <Route path="/customer/order-history" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><OrderHistory /></ProtectedRoute>} />
+          <Route path="/customer/profile" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><CustomerProfile /></ProtectedRoute>} />
+          <Route path="/customer/feedback" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><FeedbackForm /></ProtectedRoute>} />
+
+          {/* Staff Routes - Protected */}
+          <Route path="/staff/profile" element={<ProtectedRoute allowedRoles={['STAFF']}><StaffProfile /></ProtectedRoute>} />
+          <Route path="/staff/profile/:staffId" element={<ProtectedRoute allowedRoles={['STAFF']}><StaffProfile /></ProtectedRoute>} />
+          <Route path="/staff/staff-details" element={<ProtectedRoute allowedRoles={['STAFF']}><StaffDetails /></ProtectedRoute>} />
+          <Route path="/staff/staff-details/:staffId" element={<ProtectedRoute allowedRoles={['STAFF']}><StaffDetails /></ProtectedRoute>} />
+          <Route path="/staff/update-status/:staffId/:orderId" element={<ProtectedRoute allowedRoles={['STAFF']}><UpdateOrderStatus /></ProtectedRoute>} />
         </Routes>
       </AuthContext.Provider>
       <ToastContainer />
