@@ -1,6 +1,7 @@
 package com.courier.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,5 @@ public interface AdminRepository extends JpaRepository<Admin,Long>{
 		       "WHERE s.currentWarehouse = (SELECT a.warehouse FROM Admin a WHERE a.adminId = :adminId)")
 		List<ManageStaffAdminDTO> findStaffByAdminWarehouse(@Param("adminId") Long adminId);
 
+    Optional<Admin> findByEmail(String email);
 }

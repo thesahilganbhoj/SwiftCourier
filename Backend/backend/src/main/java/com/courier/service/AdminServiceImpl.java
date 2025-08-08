@@ -1,8 +1,8 @@
 package com.courier.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import com.courier.entities.Admin;
 import com.courier.entities.Order;
 import com.courier.repository.AdminRepository;
 import com.courier.repository.OrderRepository;
+import com.courier.util.PasswordUtil;
 
 import jakarta.transaction.Transactional;
 
@@ -38,16 +39,19 @@ public class AdminServiceImpl implements AdminService{
 	
 	
 	public String addAdmin(Admin admin) {
-		
-		 adminRepository.save(admin);
-		 return "Admin added successfully!!!!!!!!!!!";
+        // Hash password if not already hashed
+        if (!PasswordUtil.isSha256Hash(admin.getPassword())) {
+            admin.setPassword(PasswordUtil.sha256(admin.getPassword()));
+        }
+		adminRepository.save(admin);
+		return "Admin added successfully!!!!!!!!!!!";
 	}
 
 
 	 @Override
 	    public List<OrderAdminRespDTO> getOrdersForDashboard() {
 	        // Fetch all orders from DB
-	        List<Order> orders = orderRepository.findByStatus("Placed");
+	        List<Order> orders = orderRepository.findByStatus("PENDING");
 	        		
 
 	        // Manually map each Order entity to OrderAdminRespDTO
@@ -71,18 +75,5 @@ public class AdminServiceImpl implements AdminService{
 	    public List<ManageStaffAdminDTO> getStaffByAdminWarehouse(Long adminId) {
 	        return adminRepository.findStaffByAdminWarehouse(adminId);
 	    }
-	    
-	    
-	    public boolean deletePendingOrder(Long orderId) {
-	        Optional<Order> orderOpt = orderRepository.findById(orderId);
-
-	        if (orderOpt.isPresent() && "Pending".equalsIgnoreCase(orderOpt.get().getStatus())) {
-	            orderRepository.deleteById(orderId);
-	            return true;
-	        }
-	        return false; // Either not found or not pending
-	    }
 	
-	    
-	    
 }

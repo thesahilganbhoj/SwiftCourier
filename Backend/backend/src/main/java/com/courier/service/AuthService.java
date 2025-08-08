@@ -1,5 +1,11 @@
 package com.courier.service;
 
-public interface AuthService {
+import com.courier.dto.CustomerRegisterDTO;
+import com.courier.dto.LoginRequestDTO;
+import com.courier.dto.LoginResponseDTO;
+import com.courier.dto.ApiResponse;
 
+public interface AuthService {
+    ApiResponse<?> registerCustomer(CustomerRegisterDTO dto);
+    LoginResponseDTO login(LoginRequestDTO dto);
 }

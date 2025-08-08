@@ -15,6 +15,4 @@ public interface AdminService {
 	List<OrderAdminRespDTO> getOrdersForDashboard();
 
 	List<ManageStaffAdminDTO> getStaffByAdminWarehouse(Long adminId);
-
-	boolean deletePendingOrder(Long orderId);
 }

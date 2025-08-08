@@ -29,6 +29,7 @@ import com.courier.repository.RouteTrackingRepository;
 import com.courier.repository.StaffAvailabilityRepository;
 import com.courier.repository.StaffRepository;
 import com.courier.repository.WarehouseRepository;
+import com.courier.util.PasswordUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -129,26 +130,24 @@ public class StaffServiceImpl implements StaffService{
         orderRepository.save(order);
     }
 
-
+    @Override
     public StaffProfileResponseDTO getStaffProfile(Long staffId) {
         Staff staff = staffRepository.findById(staffId)
             .orElseThrow(() -> new RuntimeException("Staff not found with ID: " + staffId));
 
         Warehouse warehouse = staff.getCurrentWarehouse();
 
-        // ✅ Populate DTO using its fields
-        StaffProfileResponseDTO response = new StaffProfileResponseDTO();
-        response.setStaffId(staff.getStaffId());
-        response.setWarehouseId(warehouse != null ? warehouse.getWarehouseId() : null);
-        response.setName(staff.getName());
-        response.setEmail(staff.getEmail());
-        response.setAddress(staff.getAddress());
-        response.setWarehouseName(warehouse != null ? warehouse.getName() : null);
-        response.setContactNumber(staff.getContactNumber());
-
-        return response;
+        return new StaffProfileResponseDTO(
+            staff.getStaffId(),
+            warehouse != null ? warehouse.getWarehouseId() : null,
+            staff.getName(),
+            staff.getEmail(),
+            staff.getAddress(),
+           
+            warehouse != null ? warehouse.getName() : null,
+            		 staff.getContactNumber()
+        );
     }
-
 
     @Override
     public void updateStaffProfile(Long staffId, StaffProfileUpdateRequestDTO dto) {
@@ -178,17 +177,6 @@ public class StaffServiceImpl implements StaffService{
                 .map(this::mapToOrderResponse)
                 .collect(Collectors.toList());
     }
-//    @Override
-//    public List<StaffOrderResponseDTO> getPlacedOrders() {
-//        // Get orders that are pending and not assigned to any staff (for admin assignment)
-//        List<Order> pendingOrders = orderRepository.findByStatus("Placed");
-//        return pendingOrders.stream()
-//                .filter(order -> order.getAssignedStaff() == null) // Only unassigned orders
-//                .map(this::mapToOrderResponse)
-//                .collect(Collectors.toList());
-//    }
-//    
-
 
     @Override
     @Transactional(readOnly = true)
@@ -315,7 +303,9 @@ public class StaffServiceImpl implements StaffService{
         Staff staff = new Staff();
         staff.setName(dto.getName());
         staff.setEmail(dto.getEmail());
-        staff.setPassword(dto.getPassword());
+        // Hash password if not already hashed
+        String pwd = dto.getPassword();
+        staff.setPassword(PasswordUtil.isSha256Hash(pwd) ? pwd : PasswordUtil.sha256(pwd));
         staff.setAddress(dto.getAddress());
         staff.setContactNumber(dto.getContactNumber());
         staff.setCurrentWarehouse(warehouse);

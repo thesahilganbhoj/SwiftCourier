@@ -19,4 +19,8 @@ public class PasswordUtil {
             throw new RuntimeException("Password hashing failed", e);
         }
     }
+
+    public static boolean isSha256Hash(String value) {
+        return value != null && value.matches("^[a-fA-F0-9]{64}$");
+    }
 }
