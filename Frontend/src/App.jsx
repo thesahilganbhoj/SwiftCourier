@@ -40,7 +40,7 @@ function App() {
           <Route path="/admin/manage-hub" element={<ManageHub />} />
           <Route path="/admin/add-staff" element={<AddStaff />} />
           <Route path="/admin/manage-staff" element={<ManageStaff />} />
-          <Route path="/admin/delete-staff" element={<DeleteStaff />} />
+          <Route path="/admin/delete-staff/:staffId" element={<DeleteStaff />} />
 
           <Route path="/customer/add-courier" element={<AddCourier />} />
           <Route path="/customer/homepage" element={<HomePage />} />
