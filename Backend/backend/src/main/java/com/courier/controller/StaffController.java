@@ -119,6 +119,15 @@ public class StaffController {
     }
 
     // Get all pending orders for staff to accept
+//    @GetMapping("/placed-orders")
+//    public ResponseEntity<List<StaffOrderResponseDTO>> getPlacedOrders() {
+//        try {
+//            return ResponseEntity.ok(staffService.getPlacedOrders());
+//        } catch (Exception e) {
+//            log.error("Error fetching pending orders: {}", e.getMessage(), e);
+//            return ResponseEntity.badRequest().body(null);
+//        }
+//    }
     @GetMapping("/pending-orders")
     public ResponseEntity<List<StaffOrderResponseDTO>> getPendingOrders() {
         try {
@@ -153,7 +162,7 @@ public class StaffController {
         } catch (Exception e) {
             log.error("Error updating staff availability: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(new ApiResponse<>("Failed to update availability: " + e.getMessage(), null));
-        }
+        }	
     }
     
     

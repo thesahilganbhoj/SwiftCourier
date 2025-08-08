@@ -1,8 +1,8 @@
 package com.courier.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class AdminServiceImpl implements AdminService{
 	 @Override
 	    public List<OrderAdminRespDTO> getOrdersForDashboard() {
 	        // Fetch all orders from DB
-	        List<Order> orders = orderRepository.findByStatus("PENDING");
+	        List<Order> orders = orderRepository.findByStatus("Placed");
 	        		
 
 	        // Manually map each Order entity to OrderAdminRespDTO
@@ -71,5 +71,18 @@ public class AdminServiceImpl implements AdminService{
 	    public List<ManageStaffAdminDTO> getStaffByAdminWarehouse(Long adminId) {
 	        return adminRepository.findStaffByAdminWarehouse(adminId);
 	    }
+	    
+	    
+	    public boolean deletePendingOrder(Long orderId) {
+	        Optional<Order> orderOpt = orderRepository.findById(orderId);
+
+	        if (orderOpt.isPresent() && "Pending".equalsIgnoreCase(orderOpt.get().getStatus())) {
+	            orderRepository.deleteById(orderId);
+	            return true;
+	        }
+	        return false; // Either not found or not pending
+	    }
 	
+	    
+	    
 }

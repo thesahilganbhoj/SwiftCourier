@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 
 import com.courier.entities.Order;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

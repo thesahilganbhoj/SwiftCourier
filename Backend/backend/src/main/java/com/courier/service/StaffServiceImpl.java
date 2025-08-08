@@ -129,24 +129,26 @@ public class StaffServiceImpl implements StaffService{
         orderRepository.save(order);
     }
 
-    @Override
+
     public StaffProfileResponseDTO getStaffProfile(Long staffId) {
         Staff staff = staffRepository.findById(staffId)
             .orElseThrow(() -> new RuntimeException("Staff not found with ID: " + staffId));
 
         Warehouse warehouse = staff.getCurrentWarehouse();
 
-        return new StaffProfileResponseDTO(
-            staff.getStaffId(),
-            warehouse != null ? warehouse.getWarehouseId() : null,
-            staff.getName(),
-            staff.getEmail(),
-            staff.getAddress(),
-           
-            warehouse != null ? warehouse.getName() : null,
-            		 staff.getContactNumber()
-        );
+        // ✅ Populate DTO using its fields
+        StaffProfileResponseDTO response = new StaffProfileResponseDTO();
+        response.setStaffId(staff.getStaffId());
+        response.setWarehouseId(warehouse != null ? warehouse.getWarehouseId() : null);
+        response.setName(staff.getName());
+        response.setEmail(staff.getEmail());
+        response.setAddress(staff.getAddress());
+        response.setWarehouseName(warehouse != null ? warehouse.getName() : null);
+        response.setContactNumber(staff.getContactNumber());
+
+        return response;
     }
+
 
     @Override
     public void updateStaffProfile(Long staffId, StaffProfileUpdateRequestDTO dto) {
@@ -176,6 +178,17 @@ public class StaffServiceImpl implements StaffService{
                 .map(this::mapToOrderResponse)
                 .collect(Collectors.toList());
     }
+//    @Override
+//    public List<StaffOrderResponseDTO> getPlacedOrders() {
+//        // Get orders that are pending and not assigned to any staff (for admin assignment)
+//        List<Order> pendingOrders = orderRepository.findByStatus("Placed");
+//        return pendingOrders.stream()
+//                .filter(order -> order.getAssignedStaff() == null) // Only unassigned orders
+//                .map(this::mapToOrderResponse)
+//                .collect(Collectors.toList());
+//    }
+//    
+
 
     @Override
     @Transactional(readOnly = true)

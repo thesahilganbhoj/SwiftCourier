@@ -1,11 +1,13 @@
 package com.courier.repository;
 
-import com.courier.entities.Order;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
-import java.util.Optional;
+
+import com.courier.entities.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     // Find orders by assigned staff ID and status - Fixed query
