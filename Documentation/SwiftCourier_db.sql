@@ -1,113 +1,127 @@
--- Drop and Create Database
-DROP DATABASE IF EXISTS SwiftCourier;
-CREATE DATABASE SwiftCourier;
-USE SwiftCourier;
+-- Courier Management System Database Schema
 
--- Fix: Create Warehouses first (used in foreign keys)
-CREATE TABLE warehouses (
-    warehouse_id INT PRIMARY KEY AUTO_INCREMENT,
-    city VARCHAR(100) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    contact_number VARCHAR(15)
+CREATE DATABASE IF NOT EXISTS cms;
+USE cms;
+
+-- =====================
+-- USERS TABLE
+-- =====================
+CREATE TABLE users (
+    user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    password VARCHAR(255),
+    phone VARCHAR(255) UNIQUE,
+    role VARCHAR(255)
 );
 
--- Fix: Use VARCHAR instead of TEXT for indexed/unique columns like email
+-- =====================
+-- ADDRESSES TABLE
+-- =====================
+CREATE TABLE addresses (
+    address_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    address VARCHAR(255),
+    address_2 VARCHAR(255),
+    city VARCHAR(255),
+    country VARCHAR(255),
+    postal_code INT,
+    state VARCHAR(255),
+    user_id BIGINT,
+    CONSTRAINT fk_addresses_users FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- =====================
+-- BRANCHES TABLE
+-- =====================
+CREATE TABLE branches (
+    branch_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    branch_name VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    address_id BIGINT,
+    CONSTRAINT fk_branches_addresses FOREIGN KEY (address_id) REFERENCES addresses(address_id)
+);
+
+-- =====================
+-- CUSTOMERS TABLE
+-- =====================
 CREATE TABLE customers (
-    customer_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    contact_number VARCHAR(15),
-    address VARCHAR(255)
+    customer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    customer_type VARCHAR(255),
+    email VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    phone VARCHAR(255),
+    address_id BIGINT,
+    CONSTRAINT fk_customers_addresses FOREIGN KEY (address_id) REFERENCES addresses(address_id)
 );
 
--- Create Admin Table
-CREATE TABLE admins (
-    admin_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL
+-- =====================
+-- EMPLOYEES TABLE
+-- =====================
+CREATE TABLE employees (
+    hire_date DATE,
+    salary DOUBLE NOT NULL,
+    user_id BIGINT PRIMARY KEY,
+    branch_id BIGINT,
+    CONSTRAINT fk_employees_users FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_employees_branches FOREIGN KEY (branch_id) REFERENCES branches(branch_id)
 );
 
--- Create Staff Table (after warehouses)
-CREATE TABLE staff (
-    staff_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    contact_number VARCHAR(15),
-    current_warehouse_id INT,
-    FOREIGN KEY (current_warehouse_id) REFERENCES warehouses(warehouse_id)
-);
-
--- Fix: Create Orders Table now
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY AUTO_INCREMENT,
-    customer_id INT NOT NULL,
-    assigned_staff_id INT,
-    source_warehouse_id INT,
-    destination_warehouse_id INT,
-    sender_name VARCHAR(100),
-    receiver_name VARCHAR(100),
-    receiver_address VARCHAR(255),
-    receiver_contact VARCHAR(15),
+-- =====================
+-- PARCELS TABLE
+-- =====================
+CREATE TABLE parcels (
+    parcel_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    height INT NOT NULL,
+    length INT NOT NULL,
     weight FLOAT NOT NULL,
-    status VARCHAR(50) DEFAULT 'Pending Assignment',
-    tracking_id VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY (assigned_staff_id) REFERENCES staff(staff_id),
-    FOREIGN KEY (source_warehouse_id) REFERENCES warehouses(warehouse_id),
-    FOREIGN KEY (destination_warehouse_id) REFERENCES warehouses(warehouse_id)
+    width INT NOT NULL
 );
 
--- Courier Status History Table
-CREATE TABLE courier_status_history (
-    status_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    updated_by_staff INT,
-    updated_by_admin INT,
-    status VARCHAR(100) NOT NULL,
-    location VARCHAR(255),
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (updated_by_staff) REFERENCES staff(staff_id),
-    FOREIGN KEY (updated_by_admin) REFERENCES admins(admin_id)
+-- =====================
+-- PAYMENTS TABLE
+-- =====================
+CREATE TABLE payments (
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    amount FLOAT,
+    payment_date DATE,
+    payment_method INT
 );
 
--- Staff Availability Table
-CREATE TABLE staff_availability (
-    staff_id INT PRIMARY KEY,
-    current_location VARCHAR(255),
-    is_available BOOLEAN DEFAULT TRUE,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (staff_id) REFERENCES staff(staff_id)
+-- =====================
+-- ORDERS TABLE
+-- =====================
+CREATE TABLE orders (
+    order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    declared_value DOUBLE,
+    delivery_date DATE,
+    order_date DATE,
+    service_type VARCHAR(255),
+    status VARCHAR(255),
+    tracking_number VARCHAR(255),
+    parcel_id_parcel_id BIGINT,
+    payment_id BIGINT,
+    receiver_id BIGINT,
+    sender_id BIGINT,
+    user_id BIGINT,
+    CONSTRAINT fk_orders_parcels FOREIGN KEY (parcel_id_parcel_id) REFERENCES parcels(parcel_id),
+    CONSTRAINT fk_orders_payments FOREIGN KEY (payment_id) REFERENCES payments(payment_id),
+    CONSTRAINT fk_orders_receiver FOREIGN KEY (receiver_id) REFERENCES customers(customer_id),
+    CONSTRAINT fk_orders_sender FOREIGN KEY (sender_id) REFERENCES customers(customer_id),
+    CONSTRAINT fk_orders_users FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Feedback Table
-CREATE TABLE feedback (
-    feedback_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    customer_id INT NOT NULL,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-    comments TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-);
-
--- Route Tracking Table
-CREATE TABLE route_tracking (
-    tracking_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    from_warehouse_id INT,
-    to_warehouse_id INT,
-    departure_time TIMESTAMP,
-    arrival_time TIMESTAMP,
-    status VARCHAR(100),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (from_warehouse_id) REFERENCES warehouses(warehouse_id),
-    FOREIGN KEY (to_warehouse_id) REFERENCES warehouses(warehouse_id)
+-- =====================
+-- COMPLAINTS TABLE
+-- =====================
+CREATE TABLE complaints (
+    complaint_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    complaint_date DATE,
+    complaint_status VARCHAR(255),
+    description VARCHAR(255),
+    remark VARCHAR(255),
+    order_id BIGINT,
+    CONSTRAINT fk_complaints_orders FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );

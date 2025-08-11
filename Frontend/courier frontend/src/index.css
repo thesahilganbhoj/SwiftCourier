@@ -1,0 +1,15 @@
+.utext {
+    position: relative;
+    line-height: 1.2em;
+}
+
+.utext:before {
+    position: absolute;
+    left: 0;
+    top: 1.2em;
+    height: 0;
+    width: 50px;
+    content: '';
+    border-bottom: 4px solid #aeab1a;
+    padding-bottom: 15px;
+}
