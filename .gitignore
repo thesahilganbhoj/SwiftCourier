@@ -39,7 +39,6 @@
 *.app
 
 #pdf
-*.pdf
 *.pptx
 
 # Dependency directories
