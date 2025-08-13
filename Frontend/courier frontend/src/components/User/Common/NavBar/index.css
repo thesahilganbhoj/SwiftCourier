@@ -1,0 +1,30 @@
+.dropdown-toggle::after {
+    content: none;
+}
+
+.navbarlink {
+    position: relative;
+    color: #000000;
+    text-decoration: none;
+  }
+  
+  .navbarlink:hover {
+    color: #000000;
+  }
+  
+  .navbarlink::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 3px;
+    bottom: 0;
+    left: 0;
+    background-color: #000000;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .navbarlink:hover::before {
+    transform: scaleX(1);
+  }
